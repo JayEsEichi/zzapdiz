@@ -49,6 +49,9 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
+    // gson (테스트 코드 작성할 때 반환 받을 정보를 객체 타입이 아닌 문자열 타입으로 받기 위함.)
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.0'
+
 }
 
 tasks.named('test') {

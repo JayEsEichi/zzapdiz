@@ -1,5 +1,6 @@
 package com.example.zzapdiz.member.domain;
 
+import com.example.zzapdiz.share.Timestamped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +15,7 @@ import java.util.List;
 @Builder
 @Getter
 @Entity
-public class Member {
+public class Member extends Timestamped {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -28,6 +29,9 @@ public class Member {
 
     @Column(nullable = false)
     private String memberName;
+
+    @Column(nullable = false)
+    private int point;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default

@@ -3,7 +3,6 @@ package com.example.zzapdiz.member.service;
 import com.example.zzapdiz.exception.member.MemberExceptionInterface;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.share.DynamicQueryDsl;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.User;

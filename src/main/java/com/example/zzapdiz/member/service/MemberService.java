@@ -12,9 +12,7 @@ import com.example.zzapdiz.member.request.MemberSignupRequestDto;
 import com.example.zzapdiz.share.DynamicQueryDsl;
 import com.example.zzapdiz.share.ResponseBody;
 import com.example.zzapdiz.share.StatusCode;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.repository.support.QuerydslJpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,10 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.HashMap;
-
-import static com.example.zzapdiz.member.domain.QMember.member;
 
 @RequiredArgsConstructor
 @Service

@@ -1,4 +1,4 @@
-package com.example.zzapdiz.exception;
+package com.example.zzapdiz.exception.member;
 
 import com.example.zzapdiz.member.request.MemberSignupRequestDto;
 import com.example.zzapdiz.share.ResponseBody;
@@ -16,4 +16,14 @@ public interface MemberExceptionInterface {
 
     /** 회원가입 정보가 모두 정상적으로 적혀있는지 확인 **/
     ResponseEntity<ResponseBody> allRequestDataCheck(MemberSignupRequestDto memberSignupRequestDto);
+
+    /** 로그인하려고하는 이메일 정보가 존재하지 않을 경우 확인 **/
+    ResponseEntity<ResponseBody> checkEmail(String email);
+
+    /** 중복된 이메일로 회원가입할 수 없음 **/
+    ResponseEntity<ResponseBody> duplicatedEmailCheck(String email);
+
+    /** 로그인 시 비밃번호가 일치하지 않을 경우 **/
+    ResponseEntity<ResponseBody> checkPassword(String password, String existPassword);
+
 }

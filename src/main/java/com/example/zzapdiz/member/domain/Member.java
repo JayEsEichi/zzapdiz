@@ -36,5 +36,4 @@ public class Member extends Timestamped {
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
     private List<String> roles = new ArrayList<>();
-
 }

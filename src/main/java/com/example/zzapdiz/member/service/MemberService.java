@@ -10,20 +10,28 @@ import com.example.zzapdiz.member.repository.MemberRepository;
 import com.example.zzapdiz.member.request.MemberLoginRequestDto;
 import com.example.zzapdiz.member.request.MemberSignupRequestDto;
 import com.example.zzapdiz.share.DynamicQueryDsl;
+import com.example.zzapdiz.share.MailDto;
 import com.example.zzapdiz.share.ResponseBody;
 import com.example.zzapdiz.share.StatusCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.net.ssl.SSLEngineResult;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
+import java.util.Properties;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class MemberService {
@@ -99,4 +107,57 @@ public class MemberService {
 
         return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
     }
+
+
+    // 아이디 찾기 (아이디 확인) 메일 발신
+    public ResponseEntity<ResponseBody> findMemberEmail(MailDto mailDto){
+
+        // 아이디를 찾고자 입력한 이메일이 존재하지 않을 경우
+        memberExceptionInterface.checkEmail(mailDto.getMailAddress());
+
+        JavaMailSender javaMailSender = MailService(mailDto.getMailAddress());
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+
+        mailMessage.setTo(mailDto.getMailAddress());
+        mailMessage.setSubject("[ZZAPDIZ] 아이디 확인 메일입니다.");
+        mailMessage.setText("아이디 : " + dynamicQueryDsl.findMemberByEmail(mailDto.getMailAddress()).getEmail());
+        javaMailSender.send(mailMessage);
+
+        return new ResponseEntity<>(new ResponseBody(StatusCode.OK, "아이디 확인 메일 발신 완료"), HttpStatus.OK);
+    }
+
+
+    private JavaMailSender MailService(String domain) {
+        JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+        Properties properties = new Properties();
+
+        properties.setProperty("mail.transport.protocol", "smtp");
+        properties.setProperty("mail.smtp.auth", "true");
+        properties.setProperty("mail.smtp.starttls.enable", "true");
+        properties.setProperty("mail.debug", "true");
+        properties.setProperty("mail.smtp.ssl.enable","true");
+        properties.setProperty("mail.smtp.starttls.enable","true");
+
+        // 가입한 계정이 네이버의 경우
+        if(domain.contains("naver")){
+            properties.setProperty("mail.smtp.ssl.trust","smtp.naver.com");
+
+            javaMailSender.setHost("smtp.naver.com");
+            javaMailSender.setUsername(domain);
+            javaMailSender.setPassword("wls124578!");
+            javaMailSender.setPort(465);
+            javaMailSender.setJavaMailProperties(properties);
+        }else if(domain.contains("google")){
+            properties.setProperty("mail.smtp.ssl.trust","smtp.google.com");
+
+            javaMailSender.setHost("smtp.google.com");
+            javaMailSender.setUsername(domain);
+            javaMailSender.setPassword("wls12457!!");
+            javaMailSender.setPort(587);
+            javaMailSender.setJavaMailProperties(properties);
+        }
+
+        return javaMailSender;
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.example.zzapdiz.member;
 
+import com.example.zzapdiz.jwt.JwtTokenProvider;
+import com.example.zzapdiz.jwt.dto.TokenDto;
 import com.example.zzapdiz.member.controller.MemberController;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.member.request.MemberLoginRequestDto;
@@ -20,15 +22,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,6 +50,11 @@ public class MemberConrollerTest {
     @Mock
     private MemberService memberService;
 
+    @Mock
+    private JwtTokenProvider jwtTokenProvider;
+
+    @Mock
+    private AuthenticationManagerBuilder authenticationManagerBuilder;
 
     private DynamicQueryDsl dynamicQueryDsl;
 
@@ -103,6 +116,29 @@ public class MemberConrollerTest {
                 .andExpect(jsonPath("$.data.email").value(loginRequestDto().getEmail()))
                 .andExpect(jsonPath("$.data.password").value(loginRequestDto().getPassword()));
     }
+
+    @DisplayName("[MemberController] 로그아웃 api")
+    @Test
+    void memberLogoutTest() throws Exception{
+        // given
+        doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, "정상적으로 로그아웃 되셨습니다. 이용해주셔서 감사합니다 ^^"), HttpStatus.OK))
+                .when(memberService)
+                .memberLogout(any(MockHttpServletRequest.class));
+
+        // when
+        ResultActions resultActionsWhen = mockMvc.perform(
+                MockMvcRequestBuilders.post("/zzapdiz/member/logout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding("utf-8"));
+
+        // then
+        ResultActions resultActionsThen = resultActionsWhen
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        verify(memberService).memberLogout(any(MockHttpServletRequest.class));
+    }
+
 
     private MemberSignupRequestDto signupRequestDto(){
         return MemberSignupRequestDto.builder()

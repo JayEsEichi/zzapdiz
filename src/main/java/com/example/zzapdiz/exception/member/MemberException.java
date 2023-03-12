@@ -1,5 +1,6 @@
 package com.example.zzapdiz.exception.member;
 
+import com.example.zzapdiz.jwt.JwtTokenProvider;
 import com.example.zzapdiz.member.request.MemberSignupRequestDto;
 import com.example.zzapdiz.share.ResponseBody;
 import com.example.zzapdiz.share.StatusCode;
@@ -10,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
+
 import static com.example.zzapdiz.member.domain.QMember.member;
 
 @RequiredArgsConstructor
@@ -18,6 +21,7 @@ public class MemberException implements MemberExceptionInterface{
 
     private final JPAQueryFactory jpaQueryFactory;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // 회원가입용 비밀번호와 재확인용 비밀번호 일치여부 확인
     @Override
@@ -83,6 +87,18 @@ public class MemberException implements MemberExceptionInterface{
     public ResponseEntity<ResponseBody> checkPassword(String password, String existPassword ) {
         if(!passwordEncoder.matches(password, existPassword)){
             return new ResponseEntity<>(new ResponseBody(StatusCode.NOT_FOUND_MATCHING_PASSWORD, null), HttpStatus.BAD_REQUEST);
+        }
+
+        return null;
+    }
+
+    // 유효한 토큰인지 확인
+    @Override
+    public ResponseEntity<ResponseBody> checkHeaderToken(HttpServletRequest request) {
+        if(!jwtTokenProvider.validateToken(request.getHeader("Refresh-Token"))){
+            System.out.println(request.getHeader("Authorization"));
+
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
         }
 
         return null;

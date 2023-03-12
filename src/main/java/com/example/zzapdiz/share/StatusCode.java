@@ -18,7 +18,8 @@ public enum StatusCode {
     EXIST_INCORRECTABLE_DATA(454, "회원가입 정보가 옳바르지 않습니다."),
     NOT_FOUND_MATCHING_EMAIL(455, "입력한 이메일에 맞는 계정 정보가 존재하지 않습니다."),
     DUPLICATED_ACCOUNT(456, "이미 회원가입된 이메일 계정입니다."),
-    NOT_FOUND_MATCHING_PASSWORD(457, "비밀번호가 일치하지 않습니다.");
+    NOT_FOUND_MATCHING_PASSWORD(457, "비밀번호가 일치하지 않습니다."),
+    UNAUTHORIZED_TOKEN(458, "유효한 토큰이 아닙니다.");
 
 
 

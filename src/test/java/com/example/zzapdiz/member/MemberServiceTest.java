@@ -10,6 +10,7 @@ import com.example.zzapdiz.member.request.MemberSignupRequestDto;
 import com.example.zzapdiz.member.response.MemberSignupResponseDto;
 import com.example.zzapdiz.member.service.MemberService;
 import com.example.zzapdiz.share.DynamicQueryDsl;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,14 +18,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class MemberServiceTest {
@@ -45,7 +48,7 @@ public class MemberServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private AuthenticationManagerBuilder authenticationManagerBuilder;
+    private JPAQueryFactory jpaQueryFactory;
 
     @Mock
     private JwtTokenProvider jwtTokenProvider;
@@ -57,15 +60,9 @@ public class MemberServiceTest {
     @Test
     void memberSignUpServiceTest() {
         // given
-        // 의존 주입받은 회원가입 에러 처리 인터페이스
-        memberExceptionInterface.matchPassword(signupRequestDto().getPassword(), signupRequestDto().getPasswordRecheck());
-        memberExceptionInterface.alreadyExistMember(signupRequestDto().getEmail());
-        memberExceptionInterface.allRequestDataCheck(signupRequestDto());
 
         // when
         int statusCode = memberService.memberSignUp(signupRequestDto()).getBody().getStatusCode();
-
-        System.out.println("서비스 테스트 ");
 
         // then
         assertThat(statusCode).isEqualTo(200);
@@ -86,6 +83,23 @@ public class MemberServiceTest {
         // then
         assertThat(statusCode).isEqualTo(200);
     }
+
+
+    @DisplayName("[MemberService] 로그아웃 서비스")
+    @Test
+    void memberLogoutServiceTest() throws ServletException {
+        // given
+        memberRepository.save(existMember());
+        MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
+        mockHttpServletRequest.addHeader("memberId", "wlstpgns51@naver.com");
+
+        // when
+        int statusCode = memberService.memberLogout(mockHttpServletRequest).getBody().getStatusCode();
+
+        // then
+        assertThat(statusCode).isEqualTo(200);
+    }
+
 
     private MemberSignupRequestDto signupRequestDto(){
         return MemberSignupRequestDto.builder()
@@ -114,8 +128,8 @@ public class MemberServiceTest {
 
     private Member existMember(){
         return Member.builder()
-                .memberId(1L)
-                .email("wlstpgns51@naver.com")
+                .memberId(2L)
+                .email("wlstpgns52@naver.com")
                 .password("wls124578!")
                 .memberName("진세훈")
                 .point(0)

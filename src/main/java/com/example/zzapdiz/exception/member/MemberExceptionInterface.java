@@ -5,6 +5,8 @@ import com.example.zzapdiz.share.ResponseBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
+
 @Component
 public interface MemberExceptionInterface {
 
@@ -25,5 +27,8 @@ public interface MemberExceptionInterface {
 
     /** 로그인 시 비밃번호가 일치하지 않을 경우 **/
     ResponseEntity<ResponseBody> checkPassword(String password, String existPassword);
+
+    /** 헤더에 발급된 토큰 정보가 유효한지 확인 **/
+    ResponseEntity<ResponseBody> checkHeaderToken(HttpServletRequest request);
 
 }

@@ -1,5 +1,6 @@
 package com.example.zzapdiz.member.controller;
 
+import com.example.zzapdiz.member.request.MemberFindRequestDto;
 import com.example.zzapdiz.member.request.MemberLoginRequestDto;
 import com.example.zzapdiz.member.request.MemberSignupRequestDto;
 import com.example.zzapdiz.member.service.MemberService;
@@ -11,6 +12,8 @@ import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
@@ -37,6 +40,16 @@ public class MemberController {
 
         return memberService.memberLogin(response, memberLoginRequestDto);
     }
+
+
+    /** 로그아웃 **/
+    @PostMapping("/member/logout")
+    public ResponseEntity<ResponseBody> memberLogout(HttpServletRequest request) throws ServletException {
+        log.info("로그아웃 api : 요청 계정 액세스 토큰 - {}", request.getHeader("Authorization"));
+
+        return memberService.memberLogout(request);
+    }
+
 
     /** 아이디 찾기 (아이디 확인) **/
     @PostMapping("/member/findid")

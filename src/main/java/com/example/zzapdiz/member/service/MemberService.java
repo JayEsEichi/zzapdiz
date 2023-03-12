@@ -13,6 +13,7 @@ import com.example.zzapdiz.share.DynamicQueryDsl;
 import com.example.zzapdiz.share.MailDto;
 import com.example.zzapdiz.share.ResponseBody;
 import com.example.zzapdiz.share.StatusCode;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,10 +27,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.net.ssl.SSLEngineResult;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Properties;
+
+import static com.example.zzapdiz.member.domain.QMember.member;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -43,6 +47,7 @@ public class MemberService {
     private final JwtTokenProvider jwtTokenProvider;
     private final DynamicQueryDsl dynamicQueryDsl;
     private final TokenRepository tokenRepository;
+    private final JPAQueryFactory jpaQueryFactory;
 
     // 회원가입
     public ResponseEntity<ResponseBody> memberSignUp(MemberSignupRequestDto memberSignupRequestDto) {
@@ -76,7 +81,7 @@ public class MemberService {
         memberExceptionInterface.checkPassword(memberLoginRequestDto.getPassword(), dynamicQueryDsl.findMemberByEmail(memberLoginRequestDto.getEmail()).getPassword());
 
         // re 로그인 시 기존에 남아있던 토큰 삭제
-        dynamicQueryDsl.reLoginDeleteToken(dynamicQueryDsl.findMemberByEmail(memberLoginRequestDto.getEmail()).getMemberId());
+        dynamicQueryDsl.deleteToken(dynamicQueryDsl.findMemberByEmail(memberLoginRequestDto.getEmail()).getMemberId());
 
         // 토큰을 발급하고 Dto 개체에 저장하는 과정
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(memberLoginRequestDto.getEmail(), memberLoginRequestDto.getPassword());
@@ -106,6 +111,26 @@ public class MemberService {
         resultSet.put("refreshToken", response.getHeader("Refresh-Token"));
 
         return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
+    }
+
+
+    // 로그아웃
+    public ResponseEntity<ResponseBody> memberLogout(HttpServletRequest request) throws ServletException {
+
+        // 로그아웃 시 토큰 확인
+        memberExceptionInterface.checkHeaderToken(request);
+
+        // 인증받은 회원의 객체 조회
+        // SecurityContextHolder에 저장된 인증된 회원 정보에서 이메일을 추출하여 객체 반환
+        Member authMember = jwtTokenProvider.getMemberFromAuthentication();
+
+        // 로그아웃 시 Token 엔티티에 저장된 토큰 정보 삭제
+        dynamicQueryDsl.deleteToken(authMember.getMemberId());
+
+        // HTTPServletRequest 에서 제공하는 logout 함수를 사용하여 로그아웃한 회원 계정의 인증 삭제
+        request.logout();
+
+        return new ResponseEntity<>(new ResponseBody(StatusCode.OK, "정상적으로 로그아웃 되셨습니다. 이용해주셔서 감사합니다 ^^"), HttpStatus.OK);
     }
 
 

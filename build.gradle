@@ -52,6 +52,10 @@ dependencies {
     // gson (테스트 코드 작성할 때 반환 받을 정보를 객체 타입이 아닌 문자열 타입으로 받기 위함.)
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.0'
 
+    // email을 보내기 위한 dependency
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+
 }
 
 tasks.named('test') {

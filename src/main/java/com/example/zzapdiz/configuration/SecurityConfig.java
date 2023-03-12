@@ -32,7 +32,8 @@ public class SecurityConfig {
                         "/css/**",
                         "/assets/**").permitAll()
                 .antMatchers("/zzapdiz/member/signup",
-                        "/zzapdiz/member/login").permitAll()
+                        "/zzapdiz/member/login",
+                        "/zzapdiz/member/findid").permitAll()
                 .antMatchers("/test").hasRole("USER")
                 .anyRequest().authenticated()
                 .and()

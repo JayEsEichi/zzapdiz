@@ -96,8 +96,6 @@ public class MemberException implements MemberExceptionInterface{
     @Override
     public ResponseEntity<ResponseBody> checkHeaderToken(HttpServletRequest request) {
         if(!jwtTokenProvider.validateToken(request.getHeader("Refresh-Token"))){
-            System.out.println(request.getHeader("Authorization"));
-
             return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
         }
 

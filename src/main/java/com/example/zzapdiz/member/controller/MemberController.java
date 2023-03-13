@@ -51,6 +51,14 @@ public class MemberController {
     }
 
 
+    /** 회원탈퇴 **/
+    @DeleteMapping("/member/signout")
+    public ResponseEntity<ResponseBody> memberSignOut(HttpServletRequest request) throws ServletException {
+        log.info("회원탈퇴 api : 요청 계정 - {}", request);
+
+        return memberService.memberSignOut(request);
+    }
+
     /** 아이디 찾기 (아이디 확인) **/
     @PostMapping("/member/findid")
     public ResponseEntity<ResponseBody> findMemberEmail(@RequestBody MailDto mailDto){

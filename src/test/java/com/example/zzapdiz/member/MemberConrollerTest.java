@@ -61,13 +61,13 @@ public class MemberConrollerTest {
     private MockMvc mockMvc;
 
     @BeforeEach
-    public void init(){
+    public void init() {
         mockMvc = MockMvcBuilders.standaloneSetup(memberController).build();
     }
 
     @DisplayName("[MemberController] 회원가입 api")
     @Test
-    void memberSignUpTest() throws Exception{
+    void memberSignUpTest() throws Exception {
         // given
         doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, signupResponseDto()), HttpStatus.OK))
                 .when(memberService)
@@ -94,7 +94,7 @@ public class MemberConrollerTest {
 
     @DisplayName("[MemberController] 로그인 api")
     @Test
-    void memberLoginTest() throws Exception{
+    void memberLoginTest() throws Exception {
         // given
         doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, existMember()), HttpStatus.OK))
                 .when(memberService)
@@ -104,10 +104,10 @@ public class MemberConrollerTest {
 
         // when
         ResultActions resultActionsWhen = mockMvc.perform(
-                        MockMvcRequestBuilders.get("/zzapdiz/member/login")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .characterEncoding("utf-8")
-                                .content(memberLoginInfo));
+                MockMvcRequestBuilders.get("/zzapdiz/member/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding("utf-8")
+                        .content(memberLoginInfo));
 
         // then
         ResultActions resultActionsThen = resultActionsWhen
@@ -119,7 +119,7 @@ public class MemberConrollerTest {
 
     @DisplayName("[MemberController] 로그아웃 api")
     @Test
-    void memberLogoutTest() throws Exception{
+    void memberLogoutTest() throws Exception {
         // given
         doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, "정상적으로 로그아웃 되셨습니다. 이용해주셔서 감사합니다 ^^"), HttpStatus.OK))
                 .when(memberService)
@@ -139,8 +139,28 @@ public class MemberConrollerTest {
         verify(memberService).memberLogout(any(MockHttpServletRequest.class));
     }
 
+    @DisplayName("[MemberController] 회원탈퇴 api")
+    @Test
+    void memberSignOutTest() throws Exception{
+        // given
+        memberService.memberSignUp(signupRequestDto());
 
-    private MemberSignupRequestDto signupRequestDto(){
+        doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, "정상적으로 회원탈퇴되었습니다. 다음에 다시 만나뵙기를 기대하고 있겠습니다."), HttpStatus.OK))
+                .when(memberService)
+                .memberSignOut(any(MockHttpServletRequest.class));
+
+        // when
+        ResultActions resultActionsWhen = mockMvc.perform(
+                MockMvcRequestBuilders.delete("/zzapdiz/member/signout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding("utf-8"))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+    }
+
+
+    private MemberSignupRequestDto signupRequestDto() {
         return MemberSignupRequestDto.builder()
                 .email("wlstpgns51@naver.com")
                 .memberName("진세훈")
@@ -149,7 +169,7 @@ public class MemberConrollerTest {
                 .build();
     }
 
-    private MemberSignupResponseDto signupResponseDto(){
+    private MemberSignupResponseDto signupResponseDto() {
         return MemberSignupResponseDto.builder()
                 .email("wlstpgns51@naver.com")
                 .password("wls124578!")
@@ -158,14 +178,14 @@ public class MemberConrollerTest {
                 .build();
     }
 
-    private MemberLoginRequestDto loginRequestDto(){
+    private MemberLoginRequestDto loginRequestDto() {
         return MemberLoginRequestDto.builder()
                 .email("wlstpgns51@naver.com")
                 .password("wls124578!")
                 .build();
     }
 
-    private Member existMember(){
+    private Member existMember() {
         return Member.builder()
                 .memberId(1L)
                 .email("wlstpgns51@naver.com")

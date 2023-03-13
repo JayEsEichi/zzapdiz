@@ -101,6 +101,19 @@ public class MemberServiceTest {
     }
 
 
+    @DisplayName("[MemberService] 회원탈퇴 서비스")
+    @Test
+    void memberSignOutTest() throws ServletException {
+        // given
+        memberRepository.save(existMember());
+
+        // when
+        int statusCode = memberService.memberSignOut(any(MockHttpServletRequest.class)).getBody().getStatusCode();
+
+        // then
+        assertThat(statusCode).isEqualTo(200);
+    }
+
     private MemberSignupRequestDto signupRequestDto(){
         return MemberSignupRequestDto.builder()
                 .email("wlstpgns51@naver.com")

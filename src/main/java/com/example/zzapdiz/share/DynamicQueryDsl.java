@@ -80,4 +80,16 @@ public class DynamicQueryDsl {
         entityManager.clear();
     }
 
+    /** 회원탈퇴 시 회원 삭제 **/
+    @Transactional
+    public void deleteMember(Long memberId){
+        jpaQueryFactory
+                .delete(member)
+                .where(member.memberId.eq(memberId))
+                .execute();
+
+        entityManager.flush();
+        entityManager.clear();
+    }
+
 }

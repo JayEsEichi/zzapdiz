@@ -134,6 +134,29 @@ public class MemberService {
     }
 
 
+    // 회원탈퇴
+    public ResponseEntity<ResponseBody> memberSignOut(HttpServletRequest request) {
+
+        // 로그아웃 시 토큰 확인
+        memberExceptionInterface.checkHeaderToken(request);
+
+        // 인증받은 회원의 객체 조회
+        // SecurityContextHolder에 저장된 인증된 회원 정보에서 이메일을 추출하여 객체 반환
+        Member authMember = jwtTokenProvider.getMemberFromAuthentication();
+
+        // 회원탈퇴 시 Token 엔티티와 해당 Member 엔티티에 저장된 데이터 삭제
+        dynamicQueryDsl.deleteToken(authMember.getMemberId());
+        dynamicQueryDsl.deleteMember(authMember.getMemberId());
+
+        // HttpRequest에 남아있는 토큰 정보들 삭제
+        request.removeAttribute("Authorization");
+        request.removeAttribute("Refresh-Token");
+        request.removeAttribute("Access-Token-Expire-Time");
+
+        return new ResponseEntity<>(new ResponseBody(StatusCode.OK, "정상적으로 회원탈퇴되었습니다. 다음에 다시 만나뵙기를 기대하고 있겠습니다."), HttpStatus.OK);
+    }
+
+
     // 아이디 찾기 (아이디 확인) 메일 발신
     public ResponseEntity<ResponseBody> findMemberEmail(MailDto mailDto){
 

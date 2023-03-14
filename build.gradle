@@ -55,7 +55,8 @@ dependencies {
     // email을 보내기 위한 dependency
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-
+    // spring boot session - session 데이터를 관리하기 위한 dependency (펀딩 프로젝트 단계별 정보들 관리)
+    implementation 'org.springframework.session:spring-session-core'
 }
 
 tasks.named('test') {

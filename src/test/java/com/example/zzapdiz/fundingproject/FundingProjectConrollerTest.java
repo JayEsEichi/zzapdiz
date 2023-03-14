@@ -2,7 +2,9 @@ package com.example.zzapdiz.fundingproject;
 
 import com.example.zzapdiz.fundingproject.controller.FundingProjectController;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase1RequestDto;
+import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase2RequestDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase1ResponseDto;
+import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
 import com.example.zzapdiz.fundingproject.service.FundingProjectService;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.member.request.MemberSignupRequestDto;
@@ -20,10 +22,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.multipart.MultipartFile;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -77,6 +81,33 @@ public class FundingProjectConrollerTest {
 
     }
 
+    @DisplayName("[FundingProjectController] 펀딩 프로젝트 생성 2단계 api")
+    @Test
+    void createFundingPhase2() throws Exception {
+        // given
+        doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, phase2ResponseDto()), HttpStatus.OK))
+                .when(fundingProjectService)
+                .fundingCreatePhase2(any(MockHttpServletRequest.class), any(FundingProjectCreatePhase2RequestDto.class), any(MockMultipartFile.class));
+
+        System.out.println(phase2RequestDto().getProjectTitle());
+
+        String phase2RequestDto = new Gson().toJson(phase2RequestDto());
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.post("/zzapdiz/funding/create/phase2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .characterEncoding("utf-8")
+                        .content(phase2RequestDto));
+        // then
+        ResultActions resultActionsThen = resultActions
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.projectTitle").value(phase2RequestDto().getProjectTitle()));
+
+    }
+
     private FundingProjectCreatePhase1RequestDto phase1RequestDto() {
         return FundingProjectCreatePhase1RequestDto.builder()
                 .projectCategory("TECH")
@@ -96,6 +127,24 @@ public class FundingProjectConrollerTest {
                 .rewardType("가구/인테리어")
                 .rewardMakeType("SELF_MADE")
                 .achievedAmount(8000000)
+                .build();
+    }
+
+    private FundingProjectCreatePhase2RequestDto phase2RequestDto() {
+        return FundingProjectCreatePhase2RequestDto.builder()
+                .projectTitle("생성 2단계 프로젝트 타이틀")
+                .endDate("20230314")
+                .adultCheck("O")
+                .searchTag("#검색태그1-#검색태그2")
+                .build();
+    }
+
+    private FundingProjectCreatePhase2ResponseDto phase2ResponseDto(){
+        return FundingProjectCreatePhase2ResponseDto.builder()
+                .projectTitle("생성 2단계 프로젝트 타이틀")
+                .endDate("20230314")
+                .adultCheck("O")
+                .searchTag("#검색태그1-#검색태그2")
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package com.example.zzapdiz.share;
+package com.example.zzapdiz.share.query;
 
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.member.request.MemberFindRequestDto;
@@ -8,11 +8,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 
 import static com.example.zzapdiz.member.domain.QMember.member;
 import static com.example.zzapdiz.jwt.domain.QToken.token;
+import static com.example.zzapdiz.share.media.QMedia.media;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -91,5 +93,18 @@ public class DynamicQueryDsl {
         entityManager.flush();
         entityManager.clear();
     }
+
+    /** 미디어 삭제 **/
+    @Transactional
+    public void deleteMedia(MultipartFile requestMedia){
+        jpaQueryFactory
+                .delete(media)
+                .where(media.mediaRealName.eq(requestMedia.getOriginalFilename()))
+                .execute();
+
+        entityManager.flush();
+        entityManager.clear();
+    }
+
 
 }

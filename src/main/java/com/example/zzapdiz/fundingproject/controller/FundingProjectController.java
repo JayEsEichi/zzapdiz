@@ -2,6 +2,7 @@ package com.example.zzapdiz.fundingproject.controller;
 
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase1RequestDto;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase2RequestDto;
+import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase3RequestDto;
 import com.example.zzapdiz.fundingproject.service.FundingProjectService;
 import com.example.zzapdiz.share.ResponseBody;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -40,6 +42,17 @@ public class FundingProjectController {
         log.info("펀딩 프로젝트 생성 2단계 api : 생성자 - {}, 프로젝트 타이틀 확인 - {}", request, fundingProjectCreatePhase2RequestDto.getProjectTitle());
 
         return fundingProjectService.fundingCreatePhase2(request, fundingProjectCreatePhase2RequestDto, thumbnailImage);
+    }
+
+    /** 펀딩 프로젝트 생성 3단계 **/
+    @PostMapping("/funding/create/phase3")
+    public ResponseEntity<ResponseBody> fundingCreatePhase3(
+            HttpServletRequest request,
+            @RequestPart(value="phase3Request", required = false)FundingProjectCreatePhase3RequestDto fundingProjectCreatePhase3RequestDto,
+            @RequestPart(value="videoAndImages") List<MultipartFile> videoAndImages){
+        log.info("펀딩 프로젝트 생성 3단계 api : 생성자 - {}, 프로젝트 파일 첨부 확인 - {}", request, videoAndImages.get(0));
+
+        return fundingProjectService.fundingCreatePhase3(request, fundingProjectCreatePhase3RequestDto, videoAndImages);
     }
 
 }

@@ -1,14 +1,13 @@
 package com.example.zzapdiz.member;
 
 import com.example.zzapdiz.jwt.JwtTokenProvider;
-import com.example.zzapdiz.jwt.dto.TokenDto;
 import com.example.zzapdiz.member.controller.MemberController;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.member.request.MemberLoginRequestDto;
 import com.example.zzapdiz.member.request.MemberSignupRequestDto;
 import com.example.zzapdiz.member.response.MemberSignupResponseDto;
 import com.example.zzapdiz.member.service.MemberService;
-import com.example.zzapdiz.share.DynamicQueryDsl;
+import com.example.zzapdiz.share.query.DynamicQueryDsl;
 import com.example.zzapdiz.share.ResponseBody;
 import com.example.zzapdiz.share.StatusCode;
 import com.google.gson.Gson;
@@ -22,17 +21,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static org.mockito.ArgumentMatchers.any;

@@ -1,8 +1,9 @@
 package com.example.zzapdiz.fundingproject.domain;
 
-import com.example.zzapdiz.share.MakerType;
-import com.example.zzapdiz.share.ProjectCategory;
-import com.example.zzapdiz.share.ProjectType;
+import com.example.zzapdiz.share.media.Media;
+import com.example.zzapdiz.share.project.MakerType;
+import com.example.zzapdiz.share.project.ProjectCategory;
+import com.example.zzapdiz.share.project.ProjectType;
 import com.example.zzapdiz.share.Timestamped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -44,11 +46,11 @@ public class FundingProject extends Timestamped {
     @Column(nullable = false)
     private String storyText;
 
-    @Column
-    private String storyImage;
-
-    @Column
-    private String storyVideo;
+//    @Column
+//    private String storyImage;
+//
+//    @Column
+//    private String storyVideo;
 
     @Column(nullable = false)
     private String projectDescript;
@@ -62,8 +64,8 @@ public class FundingProject extends Timestamped {
     @Column(nullable = false)
     private LocalDate endDate;
 
-    @Column(nullable = false)
-    private String thumbnailImage;
+//    @Column(nullable = false)
+//    private String thumbnailImage;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -80,5 +82,8 @@ public class FundingProject extends Timestamped {
 
     @Column
     private LocalDate deliveryStartDate;
+
+//    @OneToMany(mappedBy = "fundingProject", fetch = FetchType.LAZY,cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Media> medias;
 
 }

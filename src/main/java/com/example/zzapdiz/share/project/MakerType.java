@@ -1,4 +1,4 @@
-package com.example.zzapdiz.share;
+package com.example.zzapdiz.share.project;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;

@@ -9,8 +9,8 @@ import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.member.repository.MemberRepository;
 import com.example.zzapdiz.member.request.MemberLoginRequestDto;
 import com.example.zzapdiz.member.request.MemberSignupRequestDto;
-import com.example.zzapdiz.share.DynamicQueryDsl;
-import com.example.zzapdiz.share.MailDto;
+import com.example.zzapdiz.share.query.DynamicQueryDsl;
+import com.example.zzapdiz.share.mail.MailDto;
 import com.example.zzapdiz.share.ResponseBody;
 import com.example.zzapdiz.share.StatusCode;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -32,8 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Properties;
-
-import static com.example.zzapdiz.member.domain.QMember.member;
 
 @Slf4j
 @RequiredArgsConstructor

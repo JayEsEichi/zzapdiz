@@ -1,6 +1,6 @@
 package com.example.zzapdiz.reward;
 
-import com.example.zzapdiz.share.RewardMakeType;
+import com.example.zzapdiz.share.project.RewardMakeType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;

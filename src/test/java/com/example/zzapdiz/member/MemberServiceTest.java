@@ -9,7 +9,7 @@ import com.example.zzapdiz.member.request.MemberLoginRequestDto;
 import com.example.zzapdiz.member.request.MemberSignupRequestDto;
 import com.example.zzapdiz.member.response.MemberSignupResponseDto;
 import com.example.zzapdiz.member.service.MemberService;
-import com.example.zzapdiz.share.DynamicQueryDsl;
+import com.example.zzapdiz.share.query.DynamicQueryDsl;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

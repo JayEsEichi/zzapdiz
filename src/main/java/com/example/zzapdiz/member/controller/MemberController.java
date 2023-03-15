@@ -1,14 +1,12 @@
 package com.example.zzapdiz.member.controller;
 
-import com.example.zzapdiz.member.request.MemberFindRequestDto;
 import com.example.zzapdiz.member.request.MemberLoginRequestDto;
 import com.example.zzapdiz.member.request.MemberSignupRequestDto;
 import com.example.zzapdiz.member.service.MemberService;
-import com.example.zzapdiz.share.MailDto;
+import com.example.zzapdiz.share.mail.MailDto;
 import com.example.zzapdiz.share.ResponseBody;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

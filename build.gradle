@@ -33,6 +33,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'junit:junit:4.13.1'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.mysql:mysql-connector-j'
@@ -57,6 +58,15 @@ dependencies {
 
     // spring boot session - session 데이터를 관리하기 위한 dependency (펀딩 프로젝트 단계별 정보들 관리)
     implementation 'org.springframework.session:spring-session-core'
+
+    // Redis 의존성 dependency
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.session:spring-session-data-redis'
+
+    // Aws dependency
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+
 }
 
 tasks.named('test') {

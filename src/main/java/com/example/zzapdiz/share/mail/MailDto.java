@@ -1,4 +1,4 @@
-package com.example.zzapdiz.share;
+package com.example.zzapdiz.share.mail;
 
 import lombok.Getter;
 

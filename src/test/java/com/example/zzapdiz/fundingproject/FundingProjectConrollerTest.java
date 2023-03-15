@@ -3,8 +3,10 @@ package com.example.zzapdiz.fundingproject;
 import com.example.zzapdiz.fundingproject.controller.FundingProjectController;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase1RequestDto;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase2RequestDto;
+import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase3RequestDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase1ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
+import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase3ResponseDto;
 import com.example.zzapdiz.fundingproject.service.FundingProjectService;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.member.request.MemberSignupRequestDto;
@@ -23,13 +25,19 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import static org.mockito.ArgumentMatchers.any;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -89,8 +97,6 @@ public class FundingProjectConrollerTest {
                 .when(fundingProjectService)
                 .fundingCreatePhase2(any(MockHttpServletRequest.class), any(FundingProjectCreatePhase2RequestDto.class), any(MockMultipartFile.class));
 
-        System.out.println(phase2RequestDto().getProjectTitle());
-
         String phase2RequestDto = new Gson().toJson(phase2RequestDto());
 
         // when
@@ -105,6 +111,32 @@ public class FundingProjectConrollerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.projectTitle").value(phase2RequestDto().getProjectTitle()));
+
+    }
+
+    @DisplayName("[FundingProjectController] 펀딩 프로젝트 생성 3단계 api")
+    @Test
+    void createFundingPhase3() throws Exception {
+        // given
+        
+        doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, phase3ResponseDto()), HttpStatus.OK))
+                .when(fundingProjectService)
+                .fundingCreatePhase3(any(MockHttpServletRequest.class), any(FundingProjectCreatePhase3RequestDto.class), anyList());
+
+        String phase3RequestDto = new Gson().toJson(phase3RequestDto());
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.post("/zzapdiz/funding/create/phase3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .characterEncoding("utf-8")
+                        .content(phase3RequestDto));
+        // then
+        ResultActions resultActionsThen = resultActions
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.phase3Info.storyText").value(phase3RequestDto().getStoryText()));
 
     }
 
@@ -145,6 +177,23 @@ public class FundingProjectConrollerTest {
                 .endDate("20230314")
                 .adultCheck("O")
                 .searchTag("#검색태그1-#검색태그2")
+                .build();
+    }
+
+    private FundingProjectCreatePhase3RequestDto phase3RequestDto() {
+        return FundingProjectCreatePhase3RequestDto.builder()
+                .storyText("프로젝트 소개글 완성")
+                .projectDescript("프로젝트 요약 설명")
+                .openReservation("O")
+                .build();
+    }
+
+    private FundingProjectCreatePhase3ResponseDto phase3ResponseDto(){
+        return FundingProjectCreatePhase3ResponseDto.builder()
+                .memberId(1L)
+                .storyText("프로젝트 소개글 완성")
+                .projectDescript("프로젝트 요약 설명 완성")
+                .openReservation("O")
                 .build();
     }
 }

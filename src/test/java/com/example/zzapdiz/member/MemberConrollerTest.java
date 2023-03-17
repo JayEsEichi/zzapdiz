@@ -81,8 +81,8 @@ public class MemberConrollerTest {
         ResultActions resultActionsThen = resultActions
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.email").value(signupRequestDto().getEmail()))
-                .andExpect(jsonPath("$.data.memberName").value(signupRequestDto().getMemberName()));
+                .andExpect(jsonPath("email").value(signupRequestDto().getEmail()))
+                .andExpect(jsonPath("memberName").value(signupRequestDto().getMemberName()));
 
     }
 

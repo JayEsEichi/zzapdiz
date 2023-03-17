@@ -1,4 +1,4 @@
-package com.example.zzapdiz.share.redis;
+package com.example.zzapdiz.fundingproject.repository;
 
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
 import org.springframework.data.repository.CrudRepository;

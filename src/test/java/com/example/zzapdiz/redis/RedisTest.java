@@ -1,7 +1,7 @@
 package com.example.zzapdiz.redis;
 
+import com.example.zzapdiz.fundingproject.repository.Phase1RedisRepository;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase1ResponseDto;
-import com.example.zzapdiz.share.redis.Phase1RedisRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

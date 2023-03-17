@@ -4,12 +4,16 @@ import com.example.zzapdiz.fundingproject.controller.FundingProjectController;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase1RequestDto;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase2RequestDto;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase3RequestDto;
+import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase4RequestDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase1ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase3ResponseDto;
+import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase4ResponseDto;
 import com.example.zzapdiz.fundingproject.service.FundingProjectService;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.member.request.MemberSignupRequestDto;
+import com.example.zzapdiz.reward.request.RewardCreateRequestDto;
+import com.example.zzapdiz.reward.response.RewardCreateResponseDto;
 import com.example.zzapdiz.share.ResponseBody;
 import com.example.zzapdiz.share.StatusCode;
 import com.google.gson.Gson;
@@ -20,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +38,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
@@ -44,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
+@SpringBootTest
 public class FundingProjectConrollerTest {
 
     @InjectMocks
@@ -118,7 +122,6 @@ public class FundingProjectConrollerTest {
     @Test
     void createFundingPhase3() throws Exception {
         // given
-        
         doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, phase3ResponseDto()), HttpStatus.OK))
                 .when(fundingProjectService)
                 .fundingCreatePhase3(any(MockHttpServletRequest.class), any(FundingProjectCreatePhase3RequestDto.class), anyList());
@@ -139,6 +142,41 @@ public class FundingProjectConrollerTest {
                 .andExpect(jsonPath("$.data.phase3Info.storyText").value(phase3RequestDto().getStoryText()));
 
     }
+
+
+    @DisplayName("[FundingProjectController] 펀딩 프로젝트 생성 4단계 api")
+    @Test
+    void createFundingPhase4() throws Exception {
+        // given
+        List<RewardCreateResponseDto> rewardCreateResponseDtos = new ArrayList<>();
+        rewardCreateResponseDtos.add(rewardCreateResponseDto());
+
+        HashMap<String, Object> resultSet = new HashMap<>();
+        resultSet.put("phase4Info", phase4ResponseDto());
+        resultSet.put("rewardInfo", rewardCreateResponseDtos);
+
+        doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK))
+                .when(fundingProjectService)
+                .fundingCreatePhase4(any(MockHttpServletRequest.class), any(FundingProjectCreatePhase4RequestDto.class), anyList());
+
+        String phase4RequestDto = new Gson().toJson(phase4RequestDto());
+        String rewardCreateRequestDto = new Gson().toJson(rewardCreateRequestDto());
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.post("/zzapdiz/funding/create/phase4")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .characterEncoding("utf-8")
+                        .content(phase4RequestDto)
+                        .content(rewardCreateRequestDto));
+        // then
+        ResultActions resultActionsThen = resultActions
+                .andDo(print())
+                .andExpect(status().isOk());
+//                .andExpect(jsonPath("$.data.phase3Info.storyText").value(phase3RequestDto().getStoryText()));
+
+    }
+
 
     private FundingProjectCreatePhase1RequestDto phase1RequestDto() {
         return FundingProjectCreatePhase1RequestDto.builder()
@@ -194,6 +232,45 @@ public class FundingProjectConrollerTest {
                 .storyText("프로젝트 소개글 완성")
                 .projectDescript("프로젝트 요약 설명 완성")
                 .openReservation("O")
+                .build();
+    }
+
+    private FundingProjectCreatePhase4RequestDto phase4RequestDto() {
+        return FundingProjectCreatePhase4RequestDto.builder()
+                .deliveryCheck("O")
+                .deliveryStartDate("20230316")
+                .build();
+    }
+
+    private FundingProjectCreatePhase4ResponseDto phase4ResponseDto(){
+        return FundingProjectCreatePhase4ResponseDto.builder()
+                .memberId(1L)
+                .deliveryCheck("O")
+                .deliveryPrice(3000)
+                .deliveryStartDate("20230316")
+                .build();
+    }
+
+    private RewardCreateRequestDto rewardCreateRequestDto() {
+        return RewardCreateRequestDto.builder()
+                .rewardTitle("리워드")
+                .rewardContent("초회 한정 리워드")
+                .rewardQuantity(67000)
+                .rewardAmount(60)
+                .rewardOptionOnOff("O")
+                .optionContent("색상은 빨강")
+                .build();
+    }
+
+    private RewardCreateResponseDto rewardCreateResponseDto(){
+        return RewardCreateResponseDto.builder()
+                .memberId(1L)
+                .rewardTitle("리워드")
+                .rewardContent("초회 한정 리워드")
+                .rewardQuantity(67000)
+                .rewardAmount(60)
+                .rewardOptionOnOff("O")
+                .optionContent("색상은 빨강")
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package com.example.zzapdiz.reward;
+package com.example.zzapdiz.reward.domain;
 
 import com.example.zzapdiz.share.project.RewardMakeType;
 import lombok.AllArgsConstructor;

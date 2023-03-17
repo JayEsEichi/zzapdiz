@@ -20,7 +20,8 @@ public enum StatusCode {
     DUPLICATED_ACCOUNT(456, "이미 회원가입된 이메일 계정입니다."),
     NOT_FOUND_MATCHING_PASSWORD(457, "비밀번호가 일치하지 않습니다."),
     UNAUTHORIZED_TOKEN(458, "유효한 토큰이 아닙니다."),
-    EXIST_INCORRECTABLE_FUNDING_INFO(459, "펀딩 프로젝트 생성 기입 정보가 올바르지 않습니다.");
+    EXIST_INCORRECTABLE_FUNDING_INFO(459, "펀딩 프로젝트 생성 기입 정보가 올바르지 않습니다."),
+    NEED_AMOUNT_CHECK(460, "리워드 수량 설정이 옳지 않습니다. 최소 50개 이상 설정이 필요합니다.");
 
 
 

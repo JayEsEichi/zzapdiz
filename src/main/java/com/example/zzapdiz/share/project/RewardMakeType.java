@@ -13,4 +13,18 @@ public enum RewardMakeType {
     GLOBAL("글로벌");
 
     private String rewardMakeType;
+
+    public static String findRewardMakeType(String rewardMakeType){
+        switch(rewardMakeType){
+            case "SELF_MADE":
+                return RewardMakeType.SELF_MADE.rewardMakeType;
+            case "CONSIGNMENT_MADE":
+                return RewardMakeType.CONSIGNMENT_MADE.rewardMakeType;
+            case "ODM":
+                return RewardMakeType.ODM.rewardMakeType;
+            case "GLOBAL":
+                return RewardMakeType.GLOBAL.rewardMakeType;
+        }
+        return null;
+    }
 }

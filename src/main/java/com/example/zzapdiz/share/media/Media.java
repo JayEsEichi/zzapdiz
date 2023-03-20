@@ -1,6 +1,5 @@
 package com.example.zzapdiz.share.media;
 
-import com.example.zzapdiz.fundingproject.domain.FundingProject;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,6 +35,9 @@ public class Media {
 
     @Column
     private Long fundingProjectId;
+
+    @Column(nullable = false)
+    private String projectTitle;
 
 //    @JoinColumn(name = "fundingProjectId", nullable = false)
 //    @ManyToOne(fetch = FetchType.LAZY)

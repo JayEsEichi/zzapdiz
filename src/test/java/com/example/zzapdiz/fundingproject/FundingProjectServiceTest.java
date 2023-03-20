@@ -25,6 +25,8 @@ import org.springframework.data.web.JsonPath;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,9 @@ public class FundingProjectServiceTest {
 
     @Mock
     private MemberException memberException;
+
+    @Mock
+    private JwtTokenProvider jwtTokenProvider;
 
     @DisplayName("[FundingProjectService] 펀딩 프로젝트 생성 1단계 서비스")
     @Test
@@ -93,6 +98,28 @@ public class FundingProjectServiceTest {
         // then
         assertThat(statusCode).isEqualTo(200);
     }
+
+
+    @DisplayName("[FundingProjectService] 펀딩 프로젝트 생성 5단계 서비스")
+    @Test
+    void createFundingPhase5() {
+        // given
+        MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
+
+        mockHttpServletRequest.addHeader("Authoization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3bHN0cGduczUxQG5hdmVyLmNvbSIsImF1dGgiOiJVU0VSIiwiZXhwIjoxNjc5MzA4NDI2fQ.mTozdU7sMIVMmdMrfNQIfITSAtKuBQ7uaakDUGrIISI");
+        String token = mockHttpServletRequest.getHeader("Authorization");
+
+        Authentication authentication = jwtTokenProvider.getAuthentication(token);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+
+        // when
+        int statusCode = fundingProjectService.fundingCreateFinal(mockHttpServletRequest).getBody().getStatusCode();
+
+        // then
+        assertThat(statusCode).isEqualTo(200);
+    }
+
 
     private FundingProjectCreatePhase1RequestDto phase1RequestDto(){
         return FundingProjectCreatePhase1RequestDto.builder()

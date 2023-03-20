@@ -13,4 +13,18 @@ public enum ProjectType {
     SUCCESSED_PROJECT_REOPEN("와디즈에서 성공한 프로젝트 다시 공유");
 
     private String projectType;
+
+    public static String findProjectType(String projectType){
+        switch (projectType){
+            case "FIRST_OPEN":
+                return ProjectType.FIRST_OPEN.projectType;
+            case "REMAKE":
+                return ProjectType.REMAKE.projectType;
+            case "BROAD_SELL":
+                return ProjectType.BROAD_SELL.projectType;
+            case "SUCCESSED_PROJECT_REOPEN":
+                return ProjectType.SUCCESSED_PROJECT_REOPEN.projectType;
+        }
+        return null;
+    }
 }

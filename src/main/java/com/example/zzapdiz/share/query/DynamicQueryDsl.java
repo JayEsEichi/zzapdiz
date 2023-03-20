@@ -1,7 +1,9 @@
 package com.example.zzapdiz.share.query;
 
+import com.example.zzapdiz.fundingproject.domain.FundingProject;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.member.request.MemberFindRequestDto;
+import com.example.zzapdiz.share.media.Media;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +14,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 
+import java.util.List;
+
 import static com.example.zzapdiz.member.domain.QMember.member;
 import static com.example.zzapdiz.jwt.domain.QToken.token;
 import static com.example.zzapdiz.share.media.QMedia.media;
+import static com.example.zzapdiz.fundingproject.domain.QFundingProject.fundingProject;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -106,5 +111,30 @@ public class DynamicQueryDsl {
         entityManager.clear();
     }
 
+    /** 프로젝트에 속한 미디어들 조회 **/
+    public List<Media> findMedias(String projectTitle){
+        return jpaQueryFactory
+                .selectFrom(media)
+                .where(media.projectTitle.eq(projectTitle))
+                .fetch();
+    }
+
+    @Transactional
+    public void updateMedia(Media updateMedia, Long fundingProjectId){
+        jpaQueryFactory
+                .update(media)
+                .set(media.fundingProjectId, fundingProjectId)
+                .where(media.mediaId.eq(updateMedia.getMediaId()))
+                .execute();
+
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+//    public FundingProject findFundingProject(){
+//        return jpaQueryFactory
+//                .selectFrom(fundingProject)
+//                .where(fundingProject.)
+//    }
 
 }

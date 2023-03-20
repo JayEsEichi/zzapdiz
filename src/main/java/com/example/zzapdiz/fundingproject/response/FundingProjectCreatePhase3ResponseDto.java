@@ -20,4 +20,5 @@ public class FundingProjectCreatePhase3ResponseDto implements Serializable {
     private String storyText;
     private String projectDescript;
     private String openReservation;
+    private String openReservationStartDate;
 }

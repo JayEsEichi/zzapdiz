@@ -47,7 +47,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-@SpringBootTest
 public class FundingProjectConrollerTest {
 
     @InjectMocks
@@ -174,6 +173,28 @@ public class FundingProjectConrollerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
 //                .andExpect(jsonPath("$.data.phase3Info.storyText").value(phase3RequestDto().getStoryText()));
+
+    }
+
+
+    @DisplayName("[FundingProjectController] 펀딩 프로젝트 생성 5단계 api")
+    @Test
+    void createFundingPhas5() throws Exception {
+        // given
+        doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, "펀딩 프로젝트 마지막 생성 완료"), HttpStatus.OK))
+                .when(fundingProjectService)
+                .fundingCreateFinal(any(MockHttpServletRequest.class));
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.post("/zzapdiz/funding/create/phase5")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .characterEncoding("utf-8"));
+
+        // then
+        ResultActions resultActionsThen = resultActions
+                .andDo(print())
+                .andExpect(status().isOk());
 
     }
 

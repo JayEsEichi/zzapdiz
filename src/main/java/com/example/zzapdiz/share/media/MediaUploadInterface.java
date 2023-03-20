@@ -4,7 +4,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface MediaUploadInterface {
 
-    Media uploadMedia(MultipartFile media, String mediaPurpose);
+    void uploadMedia(MultipartFile media, String mediaPurpose, String projectTitle);
     void deleteFile(String fileName);
     String createFileName(String fileName);
     String getFileExtension(String fileName);

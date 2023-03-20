@@ -293,6 +293,8 @@ public class FundingProjectService {
         Optional<FundingProjectCreatePhase3ResponseDto> phase3 = phase3RedisRepository.findById(memberId);
         Optional<FundingProjectCreatePhase4ResponseDto> phase4 = phase4RedisRepository.findById(memberId);
 
+        fundingProejctExceptionInterface.checkAllPhase(phase1, phase2, phase3, phase4);
+
         // static으로 저장되었던 Reward 객체 정보 조회
         List<RewardCreateResponseDto> rewardsInfo = rewards.get(memberId);
 
@@ -367,7 +369,7 @@ public class FundingProjectService {
     }
 
 
-    // 리워드 수정
+    // 생성 중인 리워드 수정
     public ResponseEntity<ResponseBody> rewardUpdate(
             HttpServletRequest request, FundingRewardUpdateRequestDto rewardUpdateRequestDto) {
 
@@ -390,6 +392,31 @@ public class FundingProjectService {
         HashMap<String, Object> resultSet = new HashMap<>();
         resultSet.put("updateMessage", "리워드 수정이 완료되었습니다.");
         resultSet.put("rewardInfo", rewards.get(authMember.getMemberId()).get(rewardUpdateRequestDto.getNo()));
+
+        return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
+    }
+
+
+    // 생성 중인 리워드 삭제
+    public ResponseEntity<ResponseBody> rewardDelete(HttpServletRequest request, int rewardNo){
+
+        // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
+        memberExceptionInterface.checkHeaderToken(request);
+
+        Member authMember = jwtTokenProvider.getMemberFromAuthentication();
+
+        List<RewardCreateResponseDto> rewardInfo = rewards.get(authMember.getMemberId());
+
+        for(RewardCreateResponseDto reward : rewardInfo){
+            if(reward.getNo() == rewardNo){
+                rewardInfo.remove(rewardNo);
+            }
+        }
+
+        HashMap<String, Object> resultSet = new HashMap<>();
+        resultSet.put("deleteMessage", "리워드 삭제가 완료되었습니다.");
+        resultSet.put("rewardInfo", rewardInfo);
+
 
         return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
     }

@@ -4,12 +4,17 @@ import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase1Requ
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase2RequestDto;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase3RequestDto;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase4RequestDto;
+import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase1ResponseDto;
+import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
+import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase3ResponseDto;
+import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase4ResponseDto;
 import com.example.zzapdiz.share.ResponseBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public interface FundingProejctExceptionInterface {
@@ -30,6 +35,13 @@ public interface FundingProejctExceptionInterface {
 
     /** 펀딩 프로젝트의 타이틀 명은 중복될 수 없음을 확인 **/
     ResponseEntity<ResponseBody> checkDuplicatedTitle(String projectTitle);
+
+    /** 마지막 단계에서 시간 초과로 인해 기존의 정보들이 초기화 되어있을 경우 에러 메세지 응답 처리 **/
+    ResponseEntity<ResponseBody> checkAllPhase(
+            Optional<FundingProjectCreatePhase1ResponseDto> phase1,
+            Optional<FundingProjectCreatePhase2ResponseDto> phase2,
+            Optional<FundingProjectCreatePhase3ResponseDto> phase3,
+            Optional<FundingProjectCreatePhase4ResponseDto> phase4);
 
 
     // [상황에 따른 예외 응답 처리]

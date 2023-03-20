@@ -5,10 +5,7 @@ import com.example.zzapdiz.exception.member.MemberExceptionInterface;
 import com.example.zzapdiz.exception.reward.RewardExceptionInterface;
 import com.example.zzapdiz.fundingproject.domain.FundingProject;
 import com.example.zzapdiz.fundingproject.repository.*;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase1RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase2RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase3RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase4RequestDto;
+import com.example.zzapdiz.fundingproject.request.*;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase1ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase3ResponseDto;
@@ -19,7 +16,6 @@ import com.example.zzapdiz.reward.domain.Reward;
 import com.example.zzapdiz.reward.repository.RewardRepository;
 import com.example.zzapdiz.reward.request.RewardCreateRequestDto;
 import com.example.zzapdiz.reward.response.RewardCreateResponseDto;
-import com.example.zzapdiz.reward.repository.RewardRedisRepository;
 import com.example.zzapdiz.rewardoption.domain.RewardOption;
 import com.example.zzapdiz.rewardoption.repository.RewardOptionRepository;
 import com.example.zzapdiz.share.media.Media;
@@ -60,7 +56,6 @@ public class FundingProjectService {
     private final Phase2RedisRepository phase2RedisRepository;
     private final Phase3RedisRepository phase3RedisRepository;
     private final Phase4RedisRepository phase4RedisRepository;
-    private final RewardRedisRepository rewardRedisRepository;
     private final FundingProjectRepository fundingProjectRepository;
     private final RewardRepository rewardRepository;
     private final RewardOptionRepository rewardOptionRepository;
@@ -68,7 +63,7 @@ public class FundingProjectService {
     // 기타 의존성
     private final JwtTokenProvider jwtTokenProvider;
     private final DynamicQueryDsl dynamicQueryDsl;
-    private static final HashMap<Long, List<RewardCreateResponseDto>> rewards = new HashMap<>();
+    private final HashMap<Long, List<RewardCreateResponseDto>> rewards = new HashMap<>();
 
     // 펀딩 프로젝트 생성 1단계
     public ResponseEntity<ResponseBody> fundingCreatePhase1(
@@ -237,12 +232,13 @@ public class FundingProjectService {
         phase4RedisRepository.save(fundingProjectCreatePhase4ResponseDto);
 
         List<RewardCreateResponseDto> rewardCreateResponseDtos = new ArrayList<>();
+        int no = 0;
 
         // 리워드는 여러개를 생성할 수 있다.
         for (RewardCreateRequestDto rewardCreateRequestDto : rewardCreateRequestDtos) {
             // 다시 4단계 정보들을 input 하는 과정에서 리워드도 임시저장된 이전 정보가 존재한다면 삭제 처리
-            if (rewardRedisRepository.findById(memberId).isPresent()) {
-                rewardRedisRepository.deleteById(memberId);
+            if (rewards.get(authMember.getMemberId()) != null) {
+                rewards.remove(authMember.getMemberId());
             }
 
             // 리워드 옵션이 존재할 경우 내용 포함 변수
@@ -262,10 +258,11 @@ public class FundingProjectService {
                     .rewardAmount(rewardCreateRequestDto.getRewardAmount())
                     .rewardOptionOnOff(rewardCreateRequestDto.getRewardOptionOnOff())
                     .optionContent(optionContent)
+                    .no(no)
                     .build();
 
-//            rewardRedisRepository.save(rewardCreateResponseDto);
             rewardCreateResponseDtos.add(rewardCreateResponseDto);
+            no++;
         }
 
         rewards.put(authMember.getMemberId(), rewardCreateResponseDtos);
@@ -368,6 +365,35 @@ public class FundingProjectService {
 
         return new ResponseEntity<>(new ResponseBody(StatusCode.OK, "펀딩 프로젝트 생성 5단계 완료!!!!! 프로젝트 무사 생성을 축하드립니다!"), HttpStatus.OK);
     }
+
+
+    // 리워드 수정
+    public ResponseEntity<ResponseBody> rewardUpdate(
+            HttpServletRequest request, FundingRewardUpdateRequestDto rewardUpdateRequestDto) {
+
+        // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
+        memberExceptionInterface.checkHeaderToken(request);
+
+        Member authMember = jwtTokenProvider.getMemberFromAuthentication();
+
+        List<RewardCreateResponseDto> rewardInfo = rewards.get(authMember.getMemberId());
+
+        for(RewardCreateResponseDto reward : rewardInfo){
+            if(reward.getNo() == rewardUpdateRequestDto.getNo()){
+                reward.setRewardTitle(rewardUpdateRequestDto.getRewardTitle());
+                reward.setRewardAmount(rewardUpdateRequestDto.getRewardAmount());
+                reward.setRewardQuantity(rewardUpdateRequestDto.getRewardQuantity());
+                reward.setRewardContent(rewardUpdateRequestDto.getRewardContent());
+            }
+        }
+
+        HashMap<String, Object> resultSet = new HashMap<>();
+        resultSet.put("updateMessage", "리워드 수정이 완료되었습니다.");
+        resultSet.put("rewardInfo", rewards.get(authMember.getMemberId()).get(rewardUpdateRequestDto.getNo()));
+
+        return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
+    }
+
 
 }
 

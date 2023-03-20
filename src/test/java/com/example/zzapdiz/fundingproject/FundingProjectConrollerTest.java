@@ -1,10 +1,7 @@
 package com.example.zzapdiz.fundingproject;
 
 import com.example.zzapdiz.fundingproject.controller.FundingProjectController;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase1RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase2RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase3RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase4RequestDto;
+import com.example.zzapdiz.fundingproject.request.*;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase1ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase3ResponseDto;
@@ -12,6 +9,7 @@ import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase4Res
 import com.example.zzapdiz.fundingproject.service.FundingProjectService;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.member.request.MemberSignupRequestDto;
+import com.example.zzapdiz.reward.domain.Reward;
 import com.example.zzapdiz.reward.request.RewardCreateRequestDto;
 import com.example.zzapdiz.reward.response.RewardCreateResponseDto;
 import com.example.zzapdiz.share.ResponseBody;
@@ -198,6 +196,33 @@ public class FundingProjectConrollerTest {
 
     }
 
+    @DisplayName("[FundingProjectController] 생성중인 리워드 수정 api")
+    @Test
+    void rewardUpdate() throws Exception {
+        // given
+        RewardCreateResponseDto rewardCreateResponseDto = updateReward(fundingRewardUpdateRequestDto());
+
+        doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, rewardCreateResponseDto), HttpStatus.OK))
+                .when(fundingProjectService)
+                .rewardUpdate(any(MockHttpServletRequest.class), any(FundingRewardUpdateRequestDto.class));
+
+        String rewardUpdate = new Gson().toJson(fundingRewardUpdateRequestDto());
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.post("/zzapdiz/funding/reward/update")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .characterEncoding("utf-8")
+                        .content(rewardUpdate));
+
+        // then
+        ResultActions resultActionsThen = resultActions
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.rewardTitle").value(fundingRewardUpdateRequestDto().getRewardTitle()));
+
+    }
+
 
     private FundingProjectCreatePhase1RequestDto phase1RequestDto() {
         return FundingProjectCreatePhase1RequestDto.builder()
@@ -294,4 +319,26 @@ public class FundingProjectConrollerTest {
                 .optionContent("색상은 빨강")
                 .build();
     }
+
+    private FundingRewardUpdateRequestDto fundingRewardUpdateRequestDto(){
+        return FundingRewardUpdateRequestDto.builder()
+                .no(0)
+                .rewardContent("리워드 수정 테스트")
+                .rewardTitle("리워드 수정 타이틀")
+                .rewardQuantity(80000)
+                .rewardAmount(90)
+                .build();
+    }
+
+    private RewardCreateResponseDto updateReward(FundingRewardUpdateRequestDto fundingRewardUpdateRequestDto){
+        return RewardCreateResponseDto.builder()
+                .memberId(2L)
+                .rewardQuantity(fundingRewardUpdateRequestDto.getRewardQuantity())
+                .rewardTitle(fundingRewardUpdateRequestDto.getRewardTitle())
+                .rewardContent(fundingRewardUpdateRequestDto.getRewardContent())
+                .rewardAmount(fundingRewardUpdateRequestDto.getRewardAmount())
+                .no(fundingRewardUpdateRequestDto.getNo())
+                .build();
+    }
+
 }

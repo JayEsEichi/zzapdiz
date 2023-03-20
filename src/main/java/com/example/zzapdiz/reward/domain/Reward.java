@@ -1,8 +1,7 @@
 package com.example.zzapdiz.reward.domain;
 
 import com.example.zzapdiz.fundingproject.domain.FundingProject;
-import com.example.zzapdiz.rewardoption.RewardOption;
-import com.example.zzapdiz.share.project.RewardMakeType;
+import com.example.zzapdiz.rewardoption.domain.RewardOption;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

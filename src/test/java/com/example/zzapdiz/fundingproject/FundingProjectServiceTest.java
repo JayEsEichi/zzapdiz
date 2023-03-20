@@ -4,6 +4,7 @@ import com.example.zzapdiz.exception.member.MemberException;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase1RequestDto;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase2RequestDto;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase4RequestDto;
+import com.example.zzapdiz.fundingproject.request.FundingRewardUpdateRequestDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase4ResponseDto;
 import com.example.zzapdiz.fundingproject.service.FundingProjectService;
@@ -120,6 +121,28 @@ public class FundingProjectServiceTest {
         assertThat(statusCode).isEqualTo(200);
     }
 
+    @DisplayName("[FundingProjectService] 생성 중인 리워드 수정 서비스")
+    @Test
+    void rewardUpdate() {
+        // given
+        MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
+        MockHttpServletResponse mockHttpServletResponse = new MockHttpServletResponse();
+
+        mockHttpServletRequest.addHeader("Authoization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3bHN0cGduczUxQG5hdmVyLmNvbSIsImF1dGgiOiJVU0VSIiwiZXhwIjoxNjc5MzA4NDI2fQ.mTozdU7sMIVMmdMrfNQIfITSAtKuBQ7uaakDUGrIISI");
+        mockHttpServletResponse.addHeader("Authoization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3bHN0cGduczUxQG5hdmVyLmNvbSIsImF1dGgiOiJVU0VSIiwiZXhwIjoxNjc5MzA4NDI2fQ.mTozdU7sMIVMmdMrfNQIfITSAtKuBQ7uaakDUGrIISI");
+        String token = mockHttpServletRequest.getHeader("Authorization");
+
+        Authentication authentication = jwtTokenProvider.getAuthentication(token);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+
+        // when
+        int statusCode = fundingProjectService.rewardUpdate(mockHttpServletRequest, fundingRewardUpdateRequestDto()).getBody().getStatusCode();
+
+        // then
+        assertThat(statusCode).isEqualTo(200);
+    }
+
 
     private FundingProjectCreatePhase1RequestDto phase1RequestDto(){
         return FundingProjectCreatePhase1RequestDto.builder()
@@ -230,6 +253,16 @@ public class FundingProjectServiceTest {
         return MemberLoginRequestDto.builder()
                 .email("wlstpgns51@naver.com")
                 .password("wls124578!")
+                .build();
+    }
+
+    private FundingRewardUpdateRequestDto fundingRewardUpdateRequestDto(){
+        return FundingRewardUpdateRequestDto.builder()
+                .no(0)
+                .rewardContent("리워드 수정 테스트")
+                .rewardTitle("리워드 수정 타이틀")
+                .rewardQuantity(80000)
+                .rewardAmount(90)
                 .build();
     }
 }

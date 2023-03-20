@@ -1,9 +1,6 @@
 package com.example.zzapdiz.fundingproject.controller;
 
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase1RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase2RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase3RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase4RequestDto;
+import com.example.zzapdiz.fundingproject.request.*;
 import com.example.zzapdiz.fundingproject.service.FundingProjectService;
 import com.example.zzapdiz.reward.request.RewardCreateRequestDto;
 import com.example.zzapdiz.share.ResponseBody;
@@ -74,6 +71,14 @@ public class FundingProjectController {
         log.info("펀딩 프로젝트 생성 5단계 마지막 api : 생성자 - {}", request);
 
         return fundingProjectService.fundingCreateFinal(request);
+    }
+
+    /** 리워드 수정 **/
+    @PostMapping("/funding/reward/update")
+    public ResponseEntity<ResponseBody> rewardUpdate(HttpServletRequest request, @RequestBody FundingRewardUpdateRequestDto fundingRewardUpdateRequestDto){
+        log.info("리워드 수정 api : 요청자 - {}, 리워드 수정 확인 제목 - {}", request, fundingRewardUpdateRequestDto.getRewardTitle());
+
+        return fundingProjectService.rewardUpdate(request, fundingRewardUpdateRequestDto);
     }
 
 

@@ -73,7 +73,7 @@ public class FundingProjectController {
         return fundingProjectService.fundingCreateFinal(request);
     }
 
-    /** 리워드 수정 **/
+    /** 생성 중인 리워드 수정 **/
     @PostMapping("/funding/reward/update")
     public ResponseEntity<ResponseBody> rewardUpdate(HttpServletRequest request, @RequestBody FundingRewardUpdateRequestDto fundingRewardUpdateRequestDto){
         log.info("리워드 수정 api : 요청자 - {}, 리워드 수정 확인 제목 - {}", request, fundingRewardUpdateRequestDto.getRewardTitle());
@@ -81,5 +81,11 @@ public class FundingProjectController {
         return fundingProjectService.rewardUpdate(request, fundingRewardUpdateRequestDto);
     }
 
+    /** 생성 중인 리워드 삭제 **/
+    @DeleteMapping("/funding/reward/delete/{rewardNo}")
+    public ResponseEntity<ResponseBody> rewardDelete(HttpServletRequest request, @PathVariable int rewardNo){
+        log.info("리워드 삭제 api : 요청자 - {}, 리워드 삭제 리워드 - {}", request, rewardNo);
 
+        return fundingProjectService.rewardDelete(request, rewardNo);
+    }
 }

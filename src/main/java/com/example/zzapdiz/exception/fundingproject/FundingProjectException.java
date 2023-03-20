@@ -4,6 +4,10 @@ import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase1Requ
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase2RequestDto;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase3RequestDto;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase4RequestDto;
+import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase1ResponseDto;
+import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
+import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase3ResponseDto;
+import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase4ResponseDto;
 import com.example.zzapdiz.share.ResponseBody;
 import com.example.zzapdiz.share.StatusCode;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -16,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.zzapdiz.fundingproject.domain.QFundingProject.fundingProject;
 
@@ -86,6 +91,18 @@ public class FundingProjectException implements FundingProejctExceptionInterface
                 .where(fundingProject.projectTitle.eq(projectTitle))
                 .fetchOne() != null){
             return new ResponseEntity<>(new ResponseBody(StatusCode.DUPLICATED_PROJECT_TITLE, null), HttpStatus.OK);
+        }
+
+        return null;
+    }
+
+    // 시간 초과로 인한 프로젝트 단계 정보들 초기화 발생 시 에러 응답 처리
+    @Override
+    public ResponseEntity<ResponseBody> checkAllPhase(
+            Optional<FundingProjectCreatePhase1ResponseDto> phase1, Optional<FundingProjectCreatePhase2ResponseDto> phase2,
+            Optional<FundingProjectCreatePhase3ResponseDto> phase3, Optional<FundingProjectCreatePhase4ResponseDto> phase4) {
+        if(phase1.isEmpty() || phase2.isEmpty() || phase3.isEmpty() || phase4.isEmpty()){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.TIME_LIMIT_CHECK, null), HttpStatus.BAD_REQUEST);
         }
 
         return null;

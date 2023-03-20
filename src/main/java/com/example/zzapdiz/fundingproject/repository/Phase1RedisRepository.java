@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface Phase1RedisRepository extends CrudRepository<FundingProjectCreatePhase1ResponseDto, Long> {
     Optional<FundingProjectCreatePhase1ResponseDto> findById(Long id);
+
 }

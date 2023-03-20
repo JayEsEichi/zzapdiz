@@ -7,9 +7,6 @@ import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2Res
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase3ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase4ResponseDto;
 import com.example.zzapdiz.fundingproject.service.FundingProjectService;
-import com.example.zzapdiz.member.domain.Member;
-import com.example.zzapdiz.member.request.MemberSignupRequestDto;
-import com.example.zzapdiz.reward.domain.Reward;
 import com.example.zzapdiz.reward.request.RewardCreateRequestDto;
 import com.example.zzapdiz.reward.response.RewardCreateResponseDto;
 import com.example.zzapdiz.share.ResponseBody;
@@ -22,19 +19,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.util.*;
 
@@ -212,6 +206,7 @@ public class FundingProjectConrollerTest {
         ResultActions resultActions = mockMvc.perform(
                 MockMvcRequestBuilders.post("/zzapdiz/funding/reward/update")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3bHN0cGduczUyQG5hdmVyLmNvbSIsImF1dGgiOiJVU0VSIiwiZXhwIjoxNjc5MzkwOTI3fQ.pARIMdKLC_MmxYWYKW25eJe2aDEAfnvqpy17aiOKXMc")
                         .characterEncoding("utf-8")
                         .content(rewardUpdate));
 
@@ -220,6 +215,33 @@ public class FundingProjectConrollerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.rewardTitle").value(fundingRewardUpdateRequestDto().getRewardTitle()));
+
+    }
+
+
+    @DisplayName("[FundingProjectController] 생성중인 리워드 삭제 api")
+    @Test
+    void rewardDelete() throws Exception {
+        // given
+        int no = 0;
+
+        RewardCreateResponseDto rewardCreateResponseDto = updateReward(fundingRewardUpdateRequestDto());
+
+        doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, rewardCreateResponseDto), HttpStatus.OK))
+                .when(fundingProjectService)
+                .rewardDelete(any(MockHttpServletRequest.class), any(int.class));
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.delete("/zzapdiz/funding/reward/delete/" + no)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3bHN0cGduczUyQG5hdmVyLmNvbSIsImF1dGgiOiJVU0VSIiwiZXhwIjoxNjc5MzkwOTI3fQ.pARIMdKLC_MmxYWYKW25eJe2aDEAfnvqpy17aiOKXMc")
+                        .characterEncoding("utf-8"));
+
+        // then
+        ResultActions resultActionsThen = resultActions
+                .andDo(print())
+                .andExpect(status().isOk());
 
     }
 

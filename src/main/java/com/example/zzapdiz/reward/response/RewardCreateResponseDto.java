@@ -23,4 +23,5 @@ public class RewardCreateResponseDto implements Serializable {
     private String rewardOptionOnOff;
     private int rewardAmount;
     private String optionContent;
+    private int no;
 }

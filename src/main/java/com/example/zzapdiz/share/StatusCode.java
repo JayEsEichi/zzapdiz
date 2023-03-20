@@ -21,7 +21,9 @@ public enum StatusCode {
     NOT_FOUND_MATCHING_PASSWORD(457, "비밀번호가 일치하지 않습니다."),
     UNAUTHORIZED_TOKEN(458, "유효한 토큰이 아닙니다."),
     EXIST_INCORRECTABLE_FUNDING_INFO(459, "펀딩 프로젝트 생성 기입 정보가 올바르지 않습니다."),
-    NEED_AMOUNT_CHECK(460, "리워드 수량 설정이 옳지 않습니다. 최소 50개 이상 설정이 필요합니다.");
+    NEED_AMOUNT_CHECK(460, "리워드 수량 설정이 옳지 않습니다. 최소 50개 이상 설정이 필요합니다."),
+    DUPLICATED_PROJECT_TITLE(461, "이미 존재하는 프로젝트 타이틀입니다."),
+    NEED_REWARD_INFO_CHECK(462, "리워드 정보가 올바르지 않습니다.");
 
 
 

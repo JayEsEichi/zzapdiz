@@ -28,7 +28,7 @@ public class MediaUpload implements MediaUploadInterface {
     private final MediaRepository mediaRepository;
 
     @Override
-    public Media uploadMedia(MultipartFile media, String mediaPurpose) {
+    public void uploadMedia(MultipartFile media, String mediaPurpose, String projectTitle) {
 
         String mediaName = createFileName(media.getOriginalFilename()); // 각 파일의 이름을 저장
 
@@ -57,11 +57,10 @@ public class MediaUpload implements MediaUploadInterface {
                 .mediaType(media.getContentType())
                 .mediaUrl(mediaUrl)
                 .mediaPurpose(mediaPurpose)
+                .projectTitle(projectTitle)
                 .build();
 
         mediaRepository.save(uploadMedia);
-
-        return uploadMedia;
     }
 
     // S3에 저장되어있는 미디어 파일 삭제

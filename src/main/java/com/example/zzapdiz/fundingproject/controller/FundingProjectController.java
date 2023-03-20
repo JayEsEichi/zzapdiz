@@ -68,4 +68,13 @@ public class FundingProjectController {
         return fundingProjectService.fundingCreatePhase4(request, fundingProjectCreatePhase4RequestDto, rewardCreateRequestDtos);
     }
 
+    /** 펀딩 프로젝트 생성 5단계 마지막 **/
+    @PostMapping("/funding/create/phase5")
+    public ResponseEntity<ResponseBody> fundingCreateFinal(HttpServletRequest request){
+        log.info("펀딩 프로젝트 생성 5단계 마지막 api : 생성자 - {}", request);
+
+        return fundingProjectService.fundingCreateFinal(request);
+    }
+
+
 }

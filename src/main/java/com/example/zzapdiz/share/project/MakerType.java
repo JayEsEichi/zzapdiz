@@ -12,4 +12,17 @@ public enum MakerType {
     CORPORATE_BUSINESS("법인 사업자");
 
     private String makerType;
+
+    public static String findMakerType(String makerType){
+        switch(makerType){
+            case "PERSONAL":
+                return MakerType.PERSONAL.makerType;
+            case "PERSONAL_BUSINESS":
+                return MakerType.PERSONAL_BUSINESS.makerType;
+            case "CORPORATE_BUSINESS":
+                return MakerType.CORPORATE_BUSINESS.makerType;
+        }
+
+        return null;
+    }
 }

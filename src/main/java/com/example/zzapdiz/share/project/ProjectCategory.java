@@ -18,4 +18,26 @@ public enum ProjectCategory {
 
     private String category;
 
+    public static String findCategory(String projectCatgory){
+        switch(projectCatgory){
+            case "TECH":
+                return ProjectCategory.TECH.category;
+            case "FOOD":
+                return ProjectCategory.FOOD.category;
+            case "HOME_LIVING":
+                return ProjectCategory.HOME_LIVING.category;
+            case "SPORTS_MOBILITY":
+                return ProjectCategory.SPORTS_MOBILITY.category;
+            case "CHARACTER_GOODS":
+                return ProjectCategory.CHARACTER_GOODS.category;
+            case "GAME_HOBBY":
+                return ProjectCategory.GAME_HOBBY.category;
+            case "CULTURE_ARTIST":
+                return ProjectCategory.CULTURE_ARTIST.category;
+            case "GROUP":
+                return ProjectCategory.GROUP.category;
+        }
+        return null;
+    }
+
 }

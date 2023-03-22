@@ -11,8 +11,8 @@ import java.util.List;
 public interface RewardExceptionInterface {
 
     /** 리워드 생성 시 수량 체크 **/
-    ResponseEntity<ResponseBody> checkRewardAmount(List<RewardCreateRequestDto> rewardCreateRequestDtos);
+    Boolean checkRewardAmount(List<RewardCreateRequestDto> rewardCreateRequestDtos);
 
     /** 리워드들 정보 확인 **/
-    ResponseEntity<ResponseBody> checkRewardInfo(List<RewardCreateRequestDto> rewardCreateRequestDtos);
+    Boolean checkRewardInfo(List<RewardCreateRequestDto> rewardCreateRequestDtos);
 }

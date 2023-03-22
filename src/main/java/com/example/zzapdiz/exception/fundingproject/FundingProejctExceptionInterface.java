@@ -22,22 +22,22 @@ public interface FundingProejctExceptionInterface {
     // [잘못된 요청으로 인한 예외 응답 처리]
 
     /** 생성한 펀딩 프로젝트 1단계 정보 확인 **/
-    ResponseEntity<ResponseBody> checkPhase1Info(FundingProjectCreatePhase1RequestDto fundingProjectCreatePhase1RequestDto);
+    Boolean checkPhase1Info(FundingProjectCreatePhase1RequestDto fundingProjectCreatePhase1RequestDto);
 
     /** 생성한 펀딩 프로젝트 2단계 정보 확인 **/
-    ResponseEntity<ResponseBody> checkPhase2Info(FundingProjectCreatePhase2RequestDto fundingProjectCreatePhase2RequestDto, MultipartFile thumbnailImage);
+    Boolean checkPhase2Info(FundingProjectCreatePhase2RequestDto fundingProjectCreatePhase2RequestDto, MultipartFile thumbnailImage);
 
     /** 생성한 펀딩 프로젝트 3단계 정보 확인 **/
-    ResponseEntity<ResponseBody> checkPhase3Info(FundingProjectCreatePhase3RequestDto fundingProjectCreatePhase3RequestDto, List<MultipartFile> videoAndImages);
+    Boolean checkPhase3Info(FundingProjectCreatePhase3RequestDto fundingProjectCreatePhase3RequestDto, List<MultipartFile> videoAndImages);
 
     /** 생성한 펀딩 프로젝트 4단계 정보 확인 **/
-    ResponseEntity<ResponseBody> checkPhase4Info(FundingProjectCreatePhase4RequestDto fundingProjectCreatePhase4RequestDto);
+    Boolean checkPhase4Info(FundingProjectCreatePhase4RequestDto fundingProjectCreatePhase4RequestDto);
 
     /** 펀딩 프로젝트의 타이틀 명은 중복될 수 없음을 확인 **/
-    ResponseEntity<ResponseBody> checkDuplicatedTitle(String projectTitle);
+    Boolean checkDuplicatedTitle(String projectTitle);
 
     /** 마지막 단계에서 시간 초과로 인해 기존의 정보들이 초기화 되어있을 경우 에러 메세지 응답 처리 **/
-    ResponseEntity<ResponseBody> checkAllPhase(
+    Boolean checkAllPhase(
             Optional<FundingProjectCreatePhase1ResponseDto> phase1,
             Optional<FundingProjectCreatePhase2ResponseDto> phase2,
             Optional<FundingProjectCreatePhase3ResponseDto> phase3,
@@ -50,7 +50,7 @@ public interface FundingProejctExceptionInterface {
     int deliveryChecking(String deliveryCheck);
 
     /** OpenReservation이 O이라면 startDate 속성의 값을 기입받은 openReservationStartDate로 넣는다.
-     X라면 프로젝트가 생성되 바로 그 즉시 시점의 시간대를 startDate 속성에 넣는다. **/
+     X라면 프로젝트가 생성되어 바로 그 즉시 시점의 시간대를 startDate 속성에 넣는다. **/
     String startDateSetting(String openReservation, String openReservationStartdate);
 
     /** 펀딩 프로젝트 생성 마지막 최종 단계에서 반드시 기입되어야할 정보가 하나라도

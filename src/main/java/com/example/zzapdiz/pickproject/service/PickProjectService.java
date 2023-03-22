@@ -37,7 +37,9 @@ public class PickProjectService {
     public ResponseEntity<ResponseBody> pickProject(HttpServletRequest request, Long projectId) {
 
         // 유저 유효성 검증
-        memberExceptionInterface.checkHeaderToken(request);
+        if(memberExceptionInterface.checkHeaderToken(request)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
 
         // 찜하려는 유저의 정보와 찜하려는 프로젝트 조회
         Member authMember = jwtTokenProvider.getMemberFromAuthentication();

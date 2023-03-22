@@ -76,9 +76,13 @@ public class FundingProjectService {
         Long memberId = jwtTokenProvider.getMemberFromAuthentication().getMemberId();
 
         // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
-        memberExceptionInterface.checkHeaderToken(request);
+        if(memberExceptionInterface.checkHeaderToken(request)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
         // 1단계 정보들 확인
-        fundingProejctExceptionInterface.checkPhase1Info(fundingProjectCreatePhase1RequestDt0);
+        if(fundingProejctExceptionInterface.checkPhase1Info(fundingProjectCreatePhase1RequestDt0)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.EXIST_INCORRECTABLE_FUNDING_INFO, null), HttpStatus.BAD_REQUEST);
+        }
 
         // Redis로 1단계 정보 저장 관리
         FundingProjectCreatePhase1ResponseDto fundingProjectCreatePhase1ResponseDto = FundingProjectCreatePhase1ResponseDto.builder()
@@ -117,10 +121,16 @@ public class FundingProjectService {
         Long memberId = jwtTokenProvider.getMemberFromAuthentication().getMemberId();
 
         // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
-        memberExceptionInterface.checkHeaderToken(request);
+        if(memberExceptionInterface.checkHeaderToken(request)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
         // 2단계 정보 확인
-        fundingProejctExceptionInterface.checkPhase2Info(fundingProjectCreatePhase2RequestDto, thumbnailImage);
-        fundingProejctExceptionInterface.checkDuplicatedTitle(fundingProjectCreatePhase2RequestDto.getProjectTitle());
+        if(fundingProejctExceptionInterface.checkPhase2Info(fundingProjectCreatePhase2RequestDto, thumbnailImage)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.EXIST_INCORRECTABLE_FUNDING_INFO, null), HttpStatus.BAD_REQUEST);
+        }
+        if(fundingProejctExceptionInterface.checkDuplicatedTitle(fundingProjectCreatePhase2RequestDto.getProjectTitle())){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.DUPLICATED_PROJECT_TITLE, null), HttpStatus.OK);
+        }
 
         // Redis로 2단계 정보 저장 관리
         FundingProjectCreatePhase2ResponseDto fundingProjectCreatePhase2ResponseDto = FundingProjectCreatePhase2ResponseDto.builder()
@@ -162,9 +172,13 @@ public class FundingProjectService {
         Long memberId = jwtTokenProvider.getMemberFromAuthentication().getMemberId();
 
         // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
-        memberExceptionInterface.checkHeaderToken(request);
+        if(memberExceptionInterface.checkHeaderToken(request)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
         // 펀딩 프로젝트 3단계 기입 정보들 확인
-        fundingProejctExceptionInterface.checkPhase3Info(fundingProjectCreatePhase3RequestDto, videoAndImages);
+        if(fundingProejctExceptionInterface.checkPhase3Info(fundingProjectCreatePhase3RequestDto, videoAndImages)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.EXIST_INCORRECTABLE_FUNDING_INFO, null), HttpStatus.BAD_REQUEST);
+        }
 
         // Redis로 3단계 정보 저장 관리
         FundingProjectCreatePhase3ResponseDto fundingProjectCreatePhase3ResponseDto = FundingProjectCreatePhase3ResponseDto.builder()
@@ -212,11 +226,19 @@ public class FundingProjectService {
         Long memberId = jwtTokenProvider.getMemberFromAuthentication().getMemberId();
 
         // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
-        memberExceptionInterface.checkHeaderToken(request);
+        if(memberExceptionInterface.checkHeaderToken(request)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
         // 펀딩 프로젝트 4단계 기입 정보들 확인
-        fundingProejctExceptionInterface.checkPhase4Info(fundingProjectCreatePhase4RequestDto);
-        rewardExceptionInterface.checkRewardAmount(rewardCreateRequestDtos);
-        rewardExceptionInterface.checkRewardInfo(rewardCreateRequestDtos);
+        if(fundingProejctExceptionInterface.checkPhase4Info(fundingProjectCreatePhase4RequestDto)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.EXIST_INCORRECTABLE_FUNDING_INFO, null), HttpStatus.BAD_REQUEST);
+        }
+        if(rewardExceptionInterface.checkRewardAmount(rewardCreateRequestDtos)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.NEED_AMOUNT_CHECK, null), HttpStatus.BAD_REQUEST);
+        }
+        if(rewardExceptionInterface.checkRewardInfo(rewardCreateRequestDtos)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.NEED_REWARD_INFO_CHECK, null), HttpStatus.BAD_REQUEST);
+        }
 
         // Redis로 4단계 정보들 저장
         FundingProjectCreatePhase4ResponseDto fundingProjectCreatePhase4ResponseDto = FundingProjectCreatePhase4ResponseDto.builder()
@@ -283,7 +305,9 @@ public class FundingProjectService {
     public ResponseEntity<ResponseBody> fundingCreateFinal(HttpServletRequest request) {
 
         // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
-        memberExceptionInterface.checkHeaderToken(request);
+        if(memberExceptionInterface.checkHeaderToken(request)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
 
         // 인증받은 Member 객체 조회
         Member authMember = jwtTokenProvider.getMemberFromAuthentication();
@@ -295,7 +319,9 @@ public class FundingProjectService {
         Optional<FundingProjectCreatePhase3ResponseDto> phase3 = phase3RedisRepository.findById(memberId);
         Optional<FundingProjectCreatePhase4ResponseDto> phase4 = phase4RedisRepository.findById(memberId);
 
-        fundingProejctExceptionInterface.checkAllPhase(phase1, phase2, phase3, phase4);
+        if(fundingProejctExceptionInterface.checkAllPhase(phase1, phase2, phase3, phase4)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.TIME_LIMIT_CHECK, null), HttpStatus.BAD_REQUEST);
+        }
 
         // static으로 저장되었던 Reward 객체 정보 조회
         List<RewardCreateResponseDto> rewardsInfo = rewards.get(memberId);
@@ -377,7 +403,9 @@ public class FundingProjectService {
             HttpServletRequest request, FundingRewardUpdateRequestDto rewardUpdateRequestDto) {
 
         // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
-        memberExceptionInterface.checkHeaderToken(request);
+        if(memberExceptionInterface.checkHeaderToken(request)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
 
         Member authMember = jwtTokenProvider.getMemberFromAuthentication();
 
@@ -404,7 +432,9 @@ public class FundingProjectService {
     public ResponseEntity<ResponseBody> rewardDelete(HttpServletRequest request, int rewardNo){
 
         // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
-        memberExceptionInterface.checkHeaderToken(request);
+        if(memberExceptionInterface.checkHeaderToken(request)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
 
         Member authMember = jwtTokenProvider.getMemberFromAuthentication();
 

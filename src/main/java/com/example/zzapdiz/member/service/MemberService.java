@@ -50,10 +50,18 @@ public class MemberService {
     public ResponseEntity<ResponseBody> memberSignUp(MemberSignupRequestDto memberSignupRequestDto) {
 
         // 회원가입 시 발생할 에러 처리
-        memberExceptionInterface.duplicatedEmailCheck(memberSignupRequestDto.getEmail());
-        memberExceptionInterface.matchPassword(memberSignupRequestDto.getPassword(), memberSignupRequestDto.getPasswordRecheck());
-        memberExceptionInterface.alreadyExistMember(memberSignupRequestDto.getEmail());
-        memberExceptionInterface.allRequestDataCheck(memberSignupRequestDto);
+        if(memberExceptionInterface.duplicatedEmailCheck(memberSignupRequestDto.getEmail())){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.DUPLICATED_ACCOUNT, null), HttpStatus.BAD_REQUEST);
+        }
+        if(memberExceptionInterface.matchPassword(memberSignupRequestDto.getPassword(), memberSignupRequestDto.getPasswordRecheck())){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.NOT_MATCH_PASSWORD, null), HttpStatus.BAD_REQUEST);
+        }
+        if(memberExceptionInterface.alreadyExistMember(memberSignupRequestDto.getEmail())){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.ALREADY_EXIST_MEMBER, null), HttpStatus.BAD_REQUEST);
+        }
+        if(memberExceptionInterface.allRequestDataCheck(memberSignupRequestDto)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.EXIST_INCORRECTABLE_DATA, null), HttpStatus.BAD_REQUEST);
+        }
 
         // 회원가입 정보 입력
         Member member = Member.builder()
@@ -74,8 +82,12 @@ public class MemberService {
     public ResponseEntity<ResponseBody> memberLogin(HttpServletResponse response, MemberLoginRequestDto memberLoginRequestDto){
 
         // 로그인 시 발생할 에러 처리
-        memberExceptionInterface.checkEmail(memberLoginRequestDto.getEmail());
-        memberExceptionInterface.checkPassword(memberLoginRequestDto.getPassword(), dynamicQueryDsl.findMemberByEmail(memberLoginRequestDto.getEmail()).getPassword());
+        if(memberExceptionInterface.checkEmail(memberLoginRequestDto.getEmail())){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.NOT_FOUND_MATCHING_EMAIL, null), HttpStatus.BAD_REQUEST);
+        }
+        if(memberExceptionInterface.checkPassword(memberLoginRequestDto.getPassword(), dynamicQueryDsl.findMemberByEmail(memberLoginRequestDto.getEmail()).getPassword())){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.NOT_FOUND_MATCHING_PASSWORD, null), HttpStatus.BAD_REQUEST);
+        }
 
         // re 로그인 시 기존에 남아있던 토큰 삭제
         dynamicQueryDsl.deleteToken(dynamicQueryDsl.findMemberByEmail(memberLoginRequestDto.getEmail()).getMemberId());
@@ -115,7 +127,9 @@ public class MemberService {
     public ResponseEntity<ResponseBody> memberLogout(HttpServletRequest request) throws ServletException {
 
         // 로그아웃 시 토큰 확인
-        memberExceptionInterface.checkHeaderToken(request);
+        if(memberExceptionInterface.checkHeaderToken(request)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
 
         // 인증받은 회원의 객체 조회
         // SecurityContextHolder에 저장된 인증된 회원 정보에서 이메일을 추출하여 객체 반환
@@ -135,7 +149,9 @@ public class MemberService {
     public ResponseEntity<ResponseBody> memberSignOut(HttpServletRequest request) {
 
         // 로그아웃 시 토큰 확인
-        memberExceptionInterface.checkHeaderToken(request);
+        if(memberExceptionInterface.checkHeaderToken(request)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
 
         // 인증받은 회원의 객체 조회
         // SecurityContextHolder에 저장된 인증된 회원 정보에서 이메일을 추출하여 객체 반환

@@ -66,6 +66,7 @@ public class PickProjectServiceTest {
         MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
         mockHttpServletRequest.addHeader("Authorization", token);
         mockHttpServletRequest.addHeader("Refresh-Token", "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Nzk1Nzc2NTV9.4jnPeM8K0mqjoj70SThCQ8sO2E7rAlALQLsZlBjvN8U");
+
         // when
         int statusCode = pickProjectService.pickProject(mockHttpServletRequest, 1L).getStatusCodeValue();
 

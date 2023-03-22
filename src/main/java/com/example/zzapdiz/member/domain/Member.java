@@ -3,6 +3,7 @@ package com.example.zzapdiz.member.domain;
 import com.example.zzapdiz.fundingproject.domain.FundingProject;
 import com.example.zzapdiz.pickproject.domain.PickProject;
 import com.example.zzapdiz.share.Timestamped;
+import com.example.zzapdiz.supportproject.domain.DoSupport;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,6 +49,10 @@ public class Member extends Timestamped {
     @JsonIgnore
     @OneToMany(mappedBy = "member")
     private List<PickProject> pickProjects;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "member")
+    private List<DoSupport> doSupports;
 
 
 }

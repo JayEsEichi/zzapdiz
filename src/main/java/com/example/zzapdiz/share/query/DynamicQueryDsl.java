@@ -3,15 +3,11 @@ package com.example.zzapdiz.share.query;
 import com.example.zzapdiz.fundingproject.domain.FundingProject;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.member.request.MemberFindRequestDto;
-import com.example.zzapdiz.share.ResponseBody;
-import com.example.zzapdiz.share.StatusCode;
 import com.example.zzapdiz.share.media.Media;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +21,7 @@ import static com.example.zzapdiz.jwt.domain.QToken.token;
 import static com.example.zzapdiz.share.media.QMedia.media;
 import static com.example.zzapdiz.fundingproject.domain.QFundingProject.fundingProject;
 import static com.example.zzapdiz.pickproject.domain.QPickProject.pickProject;
+import static com.example.zzapdiz.supportproject.domain.QDoSupport.doSupport;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -157,6 +154,28 @@ public class DynamicQueryDsl {
             jpaQueryFactory
                     .delete(pickProject)
                     .where(pickProject.member.eq(authMember).and(pickProject.fundingProject.eq(project)))
+                    .execute();
+
+            entityManager.flush();
+            entityManager.clear();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /** 지지하기 두번 활성화 시 취소 **/
+    @Transactional
+    public Boolean supportCancel(Member authMember, FundingProject project){
+
+        if(jpaQueryFactory
+                .selectFrom(doSupport)
+                .where(doSupport.member.eq(authMember).and(doSupport.fundingProject.eq(project)))
+                .fetchOne() != null){
+            jpaQueryFactory
+                    .delete(doSupport)
+                    .where(doSupport.member.eq(authMember).and(doSupport.fundingProject.eq(project)))
                     .execute();
 
             entityManager.flush();

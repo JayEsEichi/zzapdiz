@@ -1,10 +1,8 @@
 package com.example.zzapdiz.fundingproject.domain;
 
+import com.example.zzapdiz.member.domain.Member;
+import com.example.zzapdiz.pickproject.domain.PickProject;
 import com.example.zzapdiz.reward.domain.Reward;
-import com.example.zzapdiz.share.media.Media;
-import com.example.zzapdiz.share.project.MakerType;
-import com.example.zzapdiz.share.project.ProjectCategory;
-import com.example.zzapdiz.share.project.ProjectType;
 import com.example.zzapdiz.share.Timestamped;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -13,7 +11,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -49,12 +46,6 @@ public class FundingProject extends Timestamped {
     @Column(nullable = false)
     private String storyText;
 
-//    @Column
-//    private String storyImage;
-//
-//    @Column
-//    private String storyVideo;
-
     @Column(nullable = false)
     private String projectDescript;
 
@@ -66,9 +57,6 @@ public class FundingProject extends Timestamped {
 
     @Column(nullable = false)
     private LocalDateTime endDate;
-
-//    @Column(nullable = false)
-//    private String thumbnailImage;
 
     @Column(nullable = false)
     private String makerType;
@@ -85,11 +73,15 @@ public class FundingProject extends Timestamped {
     @Column
     private LocalDateTime deliveryStartDate;
 
+    @JoinColumn(name = "memberId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member member;
+
     @JsonIgnore
     @OneToMany(mappedBy = "fundingProject", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reward> rewards;
 
-//    @OneToMany(mappedBy = "fundingProject", fetch = FetchType.LAZY,cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Media> medias;
-
+    @JsonIgnore
+    @OneToMany(mappedBy = "fundingProject")
+    private List<PickProject> pickProjects;
 }

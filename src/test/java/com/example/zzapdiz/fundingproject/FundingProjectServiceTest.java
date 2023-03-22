@@ -10,20 +10,15 @@ import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase4Res
 import com.example.zzapdiz.fundingproject.service.FundingProjectService;
 import com.example.zzapdiz.jwt.JwtTokenProvider;
 import com.example.zzapdiz.member.request.MemberLoginRequestDto;
-import com.example.zzapdiz.member.service.MemberService;
 import com.example.zzapdiz.reward.request.RewardCreateRequestDto;
 import com.example.zzapdiz.reward.response.RewardCreateResponseDto;
 import com.google.gson.Gson;
-import io.jsonwebtoken.io.IOException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.web.JsonPath;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -31,7 +26,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
@@ -39,7 +33,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class FundingProjectServiceTest {

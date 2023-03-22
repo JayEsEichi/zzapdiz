@@ -3,11 +3,15 @@ package com.example.zzapdiz.share.query;
 import com.example.zzapdiz.fundingproject.domain.FundingProject;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.member.request.MemberFindRequestDto;
+import com.example.zzapdiz.share.ResponseBody;
+import com.example.zzapdiz.share.StatusCode;
 import com.example.zzapdiz.share.media.Media;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +24,7 @@ import static com.example.zzapdiz.member.domain.QMember.member;
 import static com.example.zzapdiz.jwt.domain.QToken.token;
 import static com.example.zzapdiz.share.media.QMedia.media;
 import static com.example.zzapdiz.fundingproject.domain.QFundingProject.fundingProject;
+import static com.example.zzapdiz.pickproject.domain.QPickProject.pickProject;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -119,6 +124,7 @@ public class DynamicQueryDsl {
                 .fetch();
     }
 
+    /** 미디어가 속한 프로젝트 id 업데이트 **/
     @Transactional
     public void updateMedia(Media updateMedia, Long fundingProjectId){
         jpaQueryFactory
@@ -131,10 +137,35 @@ public class DynamicQueryDsl {
         entityManager.clear();
     }
 
-//    public FundingProject findFundingProject(){
-//        return jpaQueryFactory
-//                .selectFrom(fundingProject)
-//                .where(fundingProject.)
-//    }
+    /** 펀딩 프로젝트 조회 **/
+    public FundingProject getFundingProject(Long projectId){
+        return jpaQueryFactory
+                .selectFrom(fundingProject)
+                .where(fundingProject.fundingProjectId.eq(projectId))
+                .fetchOne();
+    }
+
+
+    /** 찜하기 두번 활성화 시 취소 **/
+    @Transactional
+    public Boolean pickCancel(Member authMember, FundingProject project){
+
+        if(jpaQueryFactory
+                .selectFrom(pickProject)
+                .where(pickProject.member.eq(authMember).and(pickProject.fundingProject.eq(project)))
+                .fetchOne() != null){
+            jpaQueryFactory
+                    .delete(pickProject)
+                    .where(pickProject.member.eq(authMember).and(pickProject.fundingProject.eq(project)))
+                    .execute();
+
+            entityManager.flush();
+            entityManager.clear();
+
+            return true;
+        }
+
+        return false;
+    }
 
 }

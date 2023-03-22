@@ -45,7 +45,6 @@ public class MemberService {
     private final JwtTokenProvider jwtTokenProvider;
     private final DynamicQueryDsl dynamicQueryDsl;
     private final TokenRepository tokenRepository;
-    private final JPAQueryFactory jpaQueryFactory;
 
     // 회원가입
     public ResponseEntity<ResponseBody> memberSignUp(MemberSignupRequestDto memberSignupRequestDto) {

@@ -24,7 +24,8 @@ public enum StatusCode {
     NEED_AMOUNT_CHECK(460, "리워드 수량 설정이 옳지 않습니다. 최소 50개 이상 설정이 필요합니다."),
     DUPLICATED_PROJECT_TITLE(461, "이미 존재하는 프로젝트 타이틀입니다."),
     NEED_REWARD_INFO_CHECK(462, "리워드 정보가 올바르지 않습니다."),
-    TIME_LIMIT_CHECK(463, "일정 시간동안 프로젝트를 생성하지 않아 정보가 초기화되었습니다. 다시 단계 정보를 넣어주십시오.");
+    TIME_LIMIT_CHECK(463, "일정 시간동안 프로젝트를 생성하지 않아 정보가 초기화되었습니다. 다시 단계 정보를 넣어주십시오."),
+    CANT_PICK_MINE(464, "본인이 생성한 프로젝트는 찜하실 수 없습니다.");
 
 
 

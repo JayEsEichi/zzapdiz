@@ -35,6 +35,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -322,6 +324,7 @@ public class FundingProjectService {
                 .deliveryPrice(phase4.get().getDeliveryPrice())
                 .deliveryStartDate(deliveryStartDate)
                 .progress("진행중")
+                .member(authMember)
                 .build();
 
         fundingProjectRepository.save(fundingProject);

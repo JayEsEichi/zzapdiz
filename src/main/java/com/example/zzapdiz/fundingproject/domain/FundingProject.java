@@ -4,6 +4,7 @@ import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.pickproject.domain.PickProject;
 import com.example.zzapdiz.reward.domain.Reward;
 import com.example.zzapdiz.share.Timestamped;
+import com.example.zzapdiz.supportproject.domain.DoSupport;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -84,4 +85,8 @@ public class FundingProject extends Timestamped {
     @JsonIgnore
     @OneToMany(mappedBy = "fundingProject")
     private List<PickProject> pickProjects;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "fundingProject")
+    private List<DoSupport> doSupports;
 }

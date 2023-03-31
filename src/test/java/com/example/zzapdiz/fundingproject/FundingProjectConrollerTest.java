@@ -1,16 +1,17 @@
 package com.example.zzapdiz.fundingproject;
 
 import com.example.zzapdiz.fundingproject.controller.FundingProjectController;
+import com.example.zzapdiz.fundingproject.domain.FundingProject;
 import com.example.zzapdiz.fundingproject.request.*;
-import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase1ResponseDto;
-import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
-import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase3ResponseDto;
-import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase4ResponseDto;
+import com.example.zzapdiz.fundingproject.response.*;
 import com.example.zzapdiz.fundingproject.service.FundingProjectService;
 import com.example.zzapdiz.reward.request.RewardCreateRequestDto;
 import com.example.zzapdiz.reward.response.RewardCreateResponseDto;
 import com.example.zzapdiz.share.ResponseBody;
 import com.example.zzapdiz.share.StatusCode;
+import com.example.zzapdiz.share.project.MakerType;
+import com.example.zzapdiz.share.project.ProjectCategory;
+import com.example.zzapdiz.share.project.ProjectType;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,6 +31,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -245,6 +247,31 @@ public class FundingProjectConrollerTest {
 
     }
 
+    @DisplayName("[FundingProjectController] 펀딩 프로젝트 조회")
+    @Test
+    void readFundingProject() throws Exception {
+        // given
+        HashMap<String, Object> resultSet = new HashMap<>();
+        resultSet.put("resultMessage", "조회 테스트 성공");
+        resultSet.put("resultInfo", getReadResponse());
+
+        doReturn(new ResponseEntity<>(new ResponseBody<>(StatusCode.OK, resultSet), HttpStatus.OK))
+                .when(fundingProjectService)
+                .fundingProjectRead(1L);
+
+        // when
+        ResultActions resultActionsWhen = mockMvc.perform(
+                MockMvcRequestBuilders.get("/zzapdiz/funding/read/1")
+                        .characterEncoding("utf-8")
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        ResultActions resultActionsThen = resultActionsWhen
+                .andDo(print())
+                .andExpect(status().isOk());
+
+    }
 
     private FundingProjectCreatePhase1RequestDto phase1RequestDto() {
         return FundingProjectCreatePhase1RequestDto.builder()
@@ -257,7 +284,7 @@ public class FundingProjectConrollerTest {
                 .build();
     }
 
-    private FundingProjectCreatePhase1ResponseDto phase1ResponseDto(){
+    private FundingProjectCreatePhase1ResponseDto phase1ResponseDto() {
         return FundingProjectCreatePhase1ResponseDto.builder()
                 .projectCategory("TECH")
                 .projectType("FIRST_OPEN")
@@ -277,7 +304,7 @@ public class FundingProjectConrollerTest {
                 .build();
     }
 
-    private FundingProjectCreatePhase2ResponseDto phase2ResponseDto(){
+    private FundingProjectCreatePhase2ResponseDto phase2ResponseDto() {
         return FundingProjectCreatePhase2ResponseDto.builder()
                 .projectTitle("생성 2단계 프로젝트 타이틀")
                 .endDate("20230314")
@@ -294,7 +321,7 @@ public class FundingProjectConrollerTest {
                 .build();
     }
 
-    private FundingProjectCreatePhase3ResponseDto phase3ResponseDto(){
+    private FundingProjectCreatePhase3ResponseDto phase3ResponseDto() {
         return FundingProjectCreatePhase3ResponseDto.builder()
                 .memberId(1L)
                 .storyText("프로젝트 소개글 완성")
@@ -310,7 +337,7 @@ public class FundingProjectConrollerTest {
                 .build();
     }
 
-    private FundingProjectCreatePhase4ResponseDto phase4ResponseDto(){
+    private FundingProjectCreatePhase4ResponseDto phase4ResponseDto() {
         return FundingProjectCreatePhase4ResponseDto.builder()
                 .memberId(1L)
                 .deliveryCheck("O")
@@ -330,7 +357,7 @@ public class FundingProjectConrollerTest {
                 .build();
     }
 
-    private RewardCreateResponseDto rewardCreateResponseDto(){
+    private RewardCreateResponseDto rewardCreateResponseDto() {
         return RewardCreateResponseDto.builder()
                 .memberId(1L)
                 .rewardTitle("리워드")
@@ -342,7 +369,7 @@ public class FundingProjectConrollerTest {
                 .build();
     }
 
-    private FundingRewardUpdateRequestDto fundingRewardUpdateRequestDto(){
+    private FundingRewardUpdateRequestDto fundingRewardUpdateRequestDto() {
         return FundingRewardUpdateRequestDto.builder()
                 .no(0)
                 .rewardContent("리워드 수정 테스트")
@@ -352,7 +379,7 @@ public class FundingProjectConrollerTest {
                 .build();
     }
 
-    private RewardCreateResponseDto updateReward(FundingRewardUpdateRequestDto fundingRewardUpdateRequestDto){
+    private RewardCreateResponseDto updateReward(FundingRewardUpdateRequestDto fundingRewardUpdateRequestDto) {
         return RewardCreateResponseDto.builder()
                 .memberId(2L)
                 .rewardQuantity(fundingRewardUpdateRequestDto.getRewardQuantity())
@@ -360,6 +387,32 @@ public class FundingProjectConrollerTest {
                 .rewardContent(fundingRewardUpdateRequestDto.getRewardContent())
                 .rewardAmount(fundingRewardUpdateRequestDto.getRewardAmount())
                 .no(fundingRewardUpdateRequestDto.getNo())
+                .build();
+    }
+
+    private ProjectReadResponseDto getReadResponse() {
+        FundingProject fakeProject = FundingProject.builder()
+                .fundingProjectId(1L)
+                .projectCategory("dd")
+                .projectType("dd")
+                .makerType("dd")
+                .achievedAmount(900)
+                .projectTitle("거짓 타이틀")
+                .endDate(LocalDateTime.now())
+                .adultCheck("X")
+                .searchTag("hh")
+                .storyText("kk")
+                .projectDescript("ll")
+                .openReservation("X")
+                .startDate(LocalDateTime.now())
+                .deliveryCheck("X")
+                .deliveryPrice(90000)
+                .deliveryStartDate(LocalDateTime.now())
+                .progress("진행중")
+                .build();
+
+        return ProjectReadResponseDto.builder()
+                .fundingProject(fakeProject)
                 .build();
     }
 

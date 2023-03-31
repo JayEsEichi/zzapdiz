@@ -88,4 +88,12 @@ public class FundingProjectController {
 
         return fundingProjectService.rewardDelete(request, rewardNo);
     }
+
+    /** 펀딩 프로젝트 조회 **/
+    @GetMapping("/funding/read/{projectId}")
+    public ResponseEntity<ResponseBody> fundingProjectRead(@PathVariable Long projectId){
+        log.info("펀딩 프로젝트 조회 api : 프로젝트 - {}", projectId);
+
+        return fundingProjectService.fundingProjectRead(projectId);
+    }
 }

@@ -5,6 +5,7 @@ import com.example.zzapdiz.rewardoption.domain.RewardOption;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -13,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
 @Entity
 public class Reward {
 
@@ -38,11 +40,11 @@ public class Reward {
     @Column(nullable = false)
     private String rewardContent; // 리워드 내용
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fundingProjectId")
     private FundingProject fundingProject;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "reward", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RewardOption> rewardOptions;
 }

@@ -6,10 +6,7 @@ import com.example.zzapdiz.exception.reward.RewardExceptionInterface;
 import com.example.zzapdiz.fundingproject.domain.FundingProject;
 import com.example.zzapdiz.fundingproject.repository.*;
 import com.example.zzapdiz.fundingproject.request.*;
-import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase1ResponseDto;
-import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
-import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase3ResponseDto;
-import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase4ResponseDto;
+import com.example.zzapdiz.fundingproject.response.*;
 import com.example.zzapdiz.jwt.JwtTokenProvider;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.reward.domain.Reward;
@@ -35,8 +32,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -76,11 +71,11 @@ public class FundingProjectService {
         Long memberId = jwtTokenProvider.getMemberFromAuthentication().getMemberId();
 
         // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
-        if(memberExceptionInterface.checkHeaderToken(request)){
+        if (memberExceptionInterface.checkHeaderToken(request)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
         }
         // 1단계 정보들 확인
-        if(fundingProejctExceptionInterface.checkPhase1Info(fundingProjectCreatePhase1RequestDt0)){
+        if (fundingProejctExceptionInterface.checkPhase1Info(fundingProjectCreatePhase1RequestDt0)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.EXIST_INCORRECTABLE_FUNDING_INFO, null), HttpStatus.BAD_REQUEST);
         }
 
@@ -121,14 +116,14 @@ public class FundingProjectService {
         Long memberId = jwtTokenProvider.getMemberFromAuthentication().getMemberId();
 
         // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
-        if(memberExceptionInterface.checkHeaderToken(request)){
+        if (memberExceptionInterface.checkHeaderToken(request)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
         }
         // 2단계 정보 확인
-        if(fundingProejctExceptionInterface.checkPhase2Info(fundingProjectCreatePhase2RequestDto, thumbnailImage)){
+        if (fundingProejctExceptionInterface.checkPhase2Info(fundingProjectCreatePhase2RequestDto, thumbnailImage)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.EXIST_INCORRECTABLE_FUNDING_INFO, null), HttpStatus.BAD_REQUEST);
         }
-        if(fundingProejctExceptionInterface.checkDuplicatedTitle(fundingProjectCreatePhase2RequestDto.getProjectTitle())){
+        if (fundingProejctExceptionInterface.checkDuplicatedTitle(fundingProjectCreatePhase2RequestDto.getProjectTitle())) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.DUPLICATED_PROJECT_TITLE, null), HttpStatus.OK);
         }
 
@@ -172,11 +167,11 @@ public class FundingProjectService {
         Long memberId = jwtTokenProvider.getMemberFromAuthentication().getMemberId();
 
         // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
-        if(memberExceptionInterface.checkHeaderToken(request)){
+        if (memberExceptionInterface.checkHeaderToken(request)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
         }
         // 펀딩 프로젝트 3단계 기입 정보들 확인
-        if(fundingProejctExceptionInterface.checkPhase3Info(fundingProjectCreatePhase3RequestDto, videoAndImages)){
+        if (fundingProejctExceptionInterface.checkPhase3Info(fundingProjectCreatePhase3RequestDto, videoAndImages)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.EXIST_INCORRECTABLE_FUNDING_INFO, null), HttpStatus.BAD_REQUEST);
         }
 
@@ -226,17 +221,17 @@ public class FundingProjectService {
         Long memberId = jwtTokenProvider.getMemberFromAuthentication().getMemberId();
 
         // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
-        if(memberExceptionInterface.checkHeaderToken(request)){
+        if (memberExceptionInterface.checkHeaderToken(request)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
         }
         // 펀딩 프로젝트 4단계 기입 정보들 확인
-        if(fundingProejctExceptionInterface.checkPhase4Info(fundingProjectCreatePhase4RequestDto)){
+        if (fundingProejctExceptionInterface.checkPhase4Info(fundingProjectCreatePhase4RequestDto)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.EXIST_INCORRECTABLE_FUNDING_INFO, null), HttpStatus.BAD_REQUEST);
         }
-        if(rewardExceptionInterface.checkRewardAmount(rewardCreateRequestDtos)){
+        if (rewardExceptionInterface.checkRewardAmount(rewardCreateRequestDtos)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.NEED_AMOUNT_CHECK, null), HttpStatus.BAD_REQUEST);
         }
-        if(rewardExceptionInterface.checkRewardInfo(rewardCreateRequestDtos)){
+        if (rewardExceptionInterface.checkRewardInfo(rewardCreateRequestDtos)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.NEED_REWARD_INFO_CHECK, null), HttpStatus.BAD_REQUEST);
         }
 
@@ -305,7 +300,7 @@ public class FundingProjectService {
     public ResponseEntity<ResponseBody> fundingCreateFinal(HttpServletRequest request) {
 
         // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
-        if(memberExceptionInterface.checkHeaderToken(request)){
+        if (memberExceptionInterface.checkHeaderToken(request)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
         }
 
@@ -319,7 +314,7 @@ public class FundingProjectService {
         Optional<FundingProjectCreatePhase3ResponseDto> phase3 = phase3RedisRepository.findById(memberId);
         Optional<FundingProjectCreatePhase4ResponseDto> phase4 = phase4RedisRepository.findById(memberId);
 
-        if(fundingProejctExceptionInterface.checkAllPhase(phase1, phase2, phase3, phase4)){
+        if (fundingProejctExceptionInterface.checkAllPhase(phase1, phase2, phase3, phase4)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.TIME_LIMIT_CHECK, null), HttpStatus.BAD_REQUEST);
         }
 
@@ -403,7 +398,7 @@ public class FundingProjectService {
             HttpServletRequest request, FundingRewardUpdateRequestDto rewardUpdateRequestDto) {
 
         // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
-        if(memberExceptionInterface.checkHeaderToken(request)){
+        if (memberExceptionInterface.checkHeaderToken(request)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
         }
 
@@ -411,8 +406,8 @@ public class FundingProjectService {
 
         List<RewardCreateResponseDto> rewardInfo = rewards.get(authMember.getMemberId());
 
-        for(RewardCreateResponseDto reward : rewardInfo){
-            if(reward.getNo() == rewardUpdateRequestDto.getNo()){
+        for (RewardCreateResponseDto reward : rewardInfo) {
+            if (reward.getNo() == rewardUpdateRequestDto.getNo()) {
                 reward.setRewardTitle(rewardUpdateRequestDto.getRewardTitle());
                 reward.setRewardAmount(rewardUpdateRequestDto.getRewardAmount());
                 reward.setRewardQuantity(rewardUpdateRequestDto.getRewardQuantity());
@@ -429,10 +424,10 @@ public class FundingProjectService {
 
 
     // 생성 중인 리워드 삭제
-    public ResponseEntity<ResponseBody> rewardDelete(HttpServletRequest request, int rewardNo){
+    public ResponseEntity<ResponseBody> rewardDelete(HttpServletRequest request, int rewardNo) {
 
         // 펀딩 프로젝트 생성 요청 회원의 토큰 유효성 검증
-        if(memberExceptionInterface.checkHeaderToken(request)){
+        if (memberExceptionInterface.checkHeaderToken(request)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
         }
 
@@ -440,8 +435,8 @@ public class FundingProjectService {
 
         List<RewardCreateResponseDto> rewardInfo = rewards.get(authMember.getMemberId());
 
-        for(RewardCreateResponseDto reward : rewardInfo){
-            if(reward.getNo() == rewardNo){
+        for (RewardCreateResponseDto reward : rewardInfo) {
+            if (reward.getNo() == rewardNo) {
                 rewardInfo.remove(rewardNo);
             }
         }
@@ -455,6 +450,50 @@ public class FundingProjectService {
     }
 
 
+    // 펀딩 프로젝트 조회
+    public ResponseEntity<ResponseBody> fundingProjectRead(Long projectId) {
+
+        // 조회하고자 하는 프로젝트
+        FundingProject readFundingProject = dynamicQueryDsl.getFundingProject(projectId);
+        // 프로젝트 메이커명
+        String makerName = readFundingProject.getMember().getMemberName();
+        // 조회하고자 하는 프로젝트에 속한 리워드 데이터들
+        List<Reward> readRewards = dynamicQueryDsl.getRewards(readFundingProject);
+        // 조회하고자 하는 프로젝트에 속한 미디어 데이터들
+        List<Media> readMedias = dynamicQueryDsl.getMedias(readFundingProject.getFundingProjectId());
+        // 프로젝트 찜한 수
+        Long countPick = dynamicQueryDsl.countPick(readFundingProject);
+        // 프로젝트 지지 수
+        Long countSupport = dynamicQueryDsl.countSupport(readFundingProject);
+        // 현재 조회하고있는 프로젝트와 유사한 프로젝트 네개 생성
+        List<FundingProject> getSimilarProjects = dynamicQueryDsl.getSimilarFundingProjects(readFundingProject);
+        // 현재 조회하고있는 프로젝트 메이커의 다른 프로젝트 4개 생성
+        List<FundingProject> getMakersOtherProjects = dynamicQueryDsl.getMakersOtherProjects(readFundingProject.getMember(), readFundingProject.getFundingProjectId());
+
+        // 프로젝트 종료까지 남은 일자 관련 변수
+        int projectEndDate = readFundingProject.getEndDate().getDayOfYear();
+        int todayDate = LocalDateTime.now().getDayOfYear();
+
+        ProjectReadResponseDto projectReadResponseDto = ProjectReadResponseDto.builder()
+                .fundingProject(readFundingProject)
+                .remainDate((projectEndDate - todayDate) + "일 남았습니다.")
+                .makerName(makerName)
+                .rewards(readRewards)
+                .medias(readMedias)
+                .countPick(countPick)
+                .countSupport(countSupport)
+                .similarProjects(getSimilarProjects)
+                .makersOtherProjects(getMakersOtherProjects)
+                .build();
+
+        // 리워드 옵션, 달성율 우선 스킵
+
+        HashMap<String, Object> resultSet = new HashMap<>();
+        resultSet.put("immediateResultMessage", "임의의 결과값 세트");
+        resultSet.put("resultInfo", projectReadResponseDto);
+
+        return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
+    }
 }
 
 

@@ -1,6 +1,7 @@
 package com.example.zzapdiz.rewardoption.domain;
 
 import com.example.zzapdiz.reward.domain.Reward;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +23,7 @@ public class RewardOption {
     @Column(nullable = false)
     private String optionContent;
 
+    @JsonIgnore
     @JoinColumn(name = "rewardId")
     @ManyToOne(fetch = FetchType.LAZY)
     private Reward reward;

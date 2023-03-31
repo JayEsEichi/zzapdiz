@@ -10,7 +10,6 @@ import javax.persistence.EntityManager;
 
 @Slf4j
 @Configuration
-@RequiredArgsConstructor
 public class QuerydslConfig {
 
     @Bean

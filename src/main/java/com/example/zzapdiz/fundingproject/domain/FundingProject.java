@@ -19,6 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Builder
+@Table(indexes = {@Index(name = "indexId", columnList = "fundingProjectId")})
 @Entity
 public class FundingProject extends Timestamped {
 
@@ -74,6 +75,7 @@ public class FundingProject extends Timestamped {
     @Column
     private LocalDateTime deliveryStartDate;
 
+    @JsonIgnore
     @JoinColumn(name = "memberId")
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;

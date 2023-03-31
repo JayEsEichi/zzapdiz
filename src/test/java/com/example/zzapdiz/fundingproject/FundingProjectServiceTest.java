@@ -1,6 +1,8 @@
 package com.example.zzapdiz.fundingproject;
 
 import com.example.zzapdiz.exception.member.MemberException;
+import com.example.zzapdiz.fundingproject.domain.FundingProject;
+import com.example.zzapdiz.fundingproject.repository.FundingProjectRepository;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase1RequestDto;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase2RequestDto;
 import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase4RequestDto;
@@ -9,9 +11,12 @@ import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2Res
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase4ResponseDto;
 import com.example.zzapdiz.fundingproject.service.FundingProjectService;
 import com.example.zzapdiz.jwt.JwtTokenProvider;
+import com.example.zzapdiz.member.domain.Member;
+import com.example.zzapdiz.member.repository.MemberRepository;
 import com.example.zzapdiz.member.request.MemberLoginRequestDto;
 import com.example.zzapdiz.reward.request.RewardCreateRequestDto;
 import com.example.zzapdiz.reward.response.RewardCreateResponseDto;
+import com.example.zzapdiz.share.query.DynamicQueryDsl;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +33,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +47,13 @@ public class FundingProjectServiceTest {
     private FundingProjectService fundingProjectService;
 
     @Mock
-    private MemberException memberException;
+    private FundingProjectRepository fundingProjectRepository;
+
+    @Mock
+    private MemberRepository memberRepository;
+
+    @Mock
+    private DynamicQueryDsl dynamicQueryDsl;
 
     @Mock
     private JwtTokenProvider jwtTokenProvider;
@@ -161,7 +173,56 @@ public class FundingProjectServiceTest {
     }
 
 
-    private FundingProjectCreatePhase1RequestDto phase1RequestDto(){
+    @DisplayName("[FundingProjectService] 펀딩 프로젝트 조회 서비스")
+    @Test
+    void readFundingProject() {
+        // given
+        Member authMember = Member.builder()
+                .memberId(1L)
+                .memberName("테스트 유저")
+                .email("test@naver.com")
+                .password("testpwd123!")
+                .point(0)
+                .build();
+
+        memberRepository.save(authMember);
+
+        FundingProject fakeProject = FundingProject.builder()
+                .fundingProjectId(1L)
+                .projectCategory("dd")
+                .projectType("dd")
+                .makerType("dd")
+                .achievedAmount(900)
+                .projectTitle("거짓 타이틀")
+                .endDate(LocalDateTime.now())
+                .adultCheck("X")
+                .searchTag("hh")
+                .storyText("kk")
+                .projectDescript("ll")
+                .openReservation("X")
+                .startDate(LocalDateTime.now())
+                .deliveryCheck("X")
+                .deliveryPrice(90000)
+                .deliveryStartDate(LocalDateTime.now())
+                .progress("진행중")
+                .member(authMember)
+                .build();
+
+        fundingProjectRepository.save(fakeProject);
+
+
+        // when
+        int statusCode = fundingProjectService.fundingProjectRead(1L).getStatusCodeValue();
+
+
+        // then
+        assertThat(statusCode).isEqualTo(200);
+
+
+    }
+
+
+    private FundingProjectCreatePhase1RequestDto phase1RequestDto() {
         return FundingProjectCreatePhase1RequestDto.builder()
                 .projectCategory("TECH")
                 .projectType("FIRST_OPEN")
@@ -172,7 +233,7 @@ public class FundingProjectServiceTest {
                 .build();
     }
 
-    private FundingProjectCreatePhase2RequestDto phase2RequestDto(){
+    private FundingProjectCreatePhase2RequestDto phase2RequestDto() {
         return FundingProjectCreatePhase2RequestDto.builder()
                 .projectTitle("생성 2단계 프로젝트 타이틀")
                 .endDate("20230314")
@@ -181,7 +242,7 @@ public class FundingProjectServiceTest {
                 .build();
     }
 
-    private FundingProjectCreatePhase2ResponseDto phase2ResponseDto(){
+    private FundingProjectCreatePhase2ResponseDto phase2ResponseDto() {
         return FundingProjectCreatePhase2ResponseDto.builder()
                 .projectTitle("생성 2단계 프로젝트 타이틀")
                 .endDate("20230314")
@@ -197,7 +258,7 @@ public class FundingProjectServiceTest {
                 .build();
     }
 
-    private FundingProjectCreatePhase4ResponseDto phase4ResponseDto(){
+    private FundingProjectCreatePhase4ResponseDto phase4ResponseDto() {
         return FundingProjectCreatePhase4ResponseDto.builder()
                 .memberId(1L)
                 .deliveryCheck("O")
@@ -217,7 +278,7 @@ public class FundingProjectServiceTest {
                 .build();
     }
 
-    private RewardCreateResponseDto rewardCreateResponseDto(){
+    private RewardCreateResponseDto rewardCreateResponseDto() {
         return RewardCreateResponseDto.builder()
                 .memberId(1L)
                 .rewardTitle("리워드")
@@ -230,8 +291,8 @@ public class FundingProjectServiceTest {
     }
 
 
-    private List<RewardCreateRequestDto> rewardCreateRequestDtos(){
-        List<RewardCreateRequestDto> rewardRequests= new ArrayList<>();
+    private List<RewardCreateRequestDto> rewardCreateRequestDtos() {
+        List<RewardCreateRequestDto> rewardRequests = new ArrayList<>();
 
         rewardRequests.add(
                 RewardCreateRequestDto.builder()
@@ -266,14 +327,14 @@ public class FundingProjectServiceTest {
         return rewardRequests;
     }
 
-    private MemberLoginRequestDto memberLoginRequestDto(){
+    private MemberLoginRequestDto memberLoginRequestDto() {
         return MemberLoginRequestDto.builder()
                 .email("wlstpgns51@naver.com")
                 .password("wls124578!")
                 .build();
     }
 
-    private FundingRewardUpdateRequestDto fundingRewardUpdateRequestDto(){
+    private FundingRewardUpdateRequestDto fundingRewardUpdateRequestDto() {
         return FundingRewardUpdateRequestDto.builder()
                 .no(0)
                 .rewardContent("리워드 수정 테스트")

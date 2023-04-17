@@ -59,6 +59,9 @@ public class DoSupportService {
 
         doSupportRepository.save(doSupport);
 
+        // 지지수 업데이트
+        dynamicQueryDsl.supportCountUpdate(supportProject);
+
         HashMap<String, Object> resultSet = new HashMap<>();
         resultSet.put("supportMessage", "지지!");
         resultSet.put("supportInfo", doSupportResponseDto(doSupport));

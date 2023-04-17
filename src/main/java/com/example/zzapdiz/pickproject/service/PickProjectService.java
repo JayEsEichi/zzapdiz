@@ -63,6 +63,9 @@ public class PickProjectService {
 
         pickProjectRepository.save(pickProject);
 
+        // 찜하기 수 업데이트
+        dynamicQueryDsl.pickCountUpdate(pickFundingProject);
+
         // 출력 결과 확인 HashMap
         HashMap<String, Object> resultSet = new HashMap<>();
         resultSet.put("pickMessage", "찜!");

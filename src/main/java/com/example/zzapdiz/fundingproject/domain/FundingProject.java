@@ -75,6 +75,15 @@ public class FundingProject extends Timestamped {
     @Column
     private LocalDateTime deliveryStartDate;
 
+    @Column
+    private int supportCount;
+
+    @Column
+    private int pickCount;
+
+    @Column
+    private int collectQuantity;
+
     @JsonIgnore
     @JoinColumn(name = "memberId")
     @ManyToOne(fetch = FetchType.LAZY)

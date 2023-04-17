@@ -345,6 +345,8 @@ public class FundingProjectService {
                 .deliveryPrice(phase4.get().getDeliveryPrice())
                 .deliveryStartDate(deliveryStartDate)
                 .progress("진행중")
+                .supportCount(0)
+                .collectQuantity(0)
                 .member(authMember)
                 .build();
 
@@ -489,8 +491,23 @@ public class FundingProjectService {
         // 리워드 옵션, 달성율 우선 스킵
 
         HashMap<String, Object> resultSet = new HashMap<>();
-        resultSet.put("immediateResultMessage", "임의의 결과값 세트");
+        resultSet.put("resultMessage", "펀딩 프로젝트 조회");
         resultSet.put("resultInfo", projectReadResponseDto);
+
+        return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
+    }
+
+
+    // 펀딩 프로젝트 목록 조회
+    public ResponseEntity<ResponseBody> fundingProjectsRead(ProjectsListReadRequestDto projectsListReadRequestDto){
+
+        // 펀딩 프로젝트 목록 12개씩 리스트 추출
+        List<ProjectsReadResponseDto> projectLists = dynamicQueryDsl.getProjectList(
+                projectsListReadRequestDto.getProjectCategory(), projectsListReadRequestDto.getProgress(), projectsListReadRequestDto.getOrderBy(), projectsListReadRequestDto.getPageNum());
+
+        HashMap<String, Object> resultSet = new HashMap<>();
+        resultSet.put("resultMessage", "펀딩 프로젝트 목록 조회");
+        resultSet.put("resultInfo", projectLists);
 
         return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
     }

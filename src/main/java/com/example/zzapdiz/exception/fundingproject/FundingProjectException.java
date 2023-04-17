@@ -8,6 +8,7 @@ import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase1Res
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase3ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase4ResponseDto;
+import com.example.zzapdiz.member.domain.Member;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -106,7 +107,6 @@ public class FundingProjectException implements FundingProejctExceptionInterface
 
 
     // 특정 값이 반환되야하는 예외 처리일 경우
-
     // 배송 여부 확인 후 특정배송 시 최소 3000원 배송비 포함, 특정배송이 아닌 기본배송일 경우 배송비 0원 반환
     public int deliveryChecking(String deliveryCheck){
         int deliveryPrice = 0;
@@ -131,6 +131,20 @@ public class FundingProjectException implements FundingProejctExceptionInterface
         }else{
             return openReservationStartdate;
         }
+    }
+
+    // 해당 프로젝트에 어떠한 작업을 수행하려고 할 때 해당 유저가 프로젝트를 만든 장본인인지 확인
+    @Override
+    public Boolean checkProjectMaker(Member authMember, Long projectId) {
+
+        if(jpaQueryFactory
+                .selectFrom(fundingProject)
+                .where(fundingProject.fundingProjectId.eq(projectId)
+                        .and(fundingProject.member.eq(authMember))) != null){
+            return true;
+        }
+
+        return false;
     }
 
 

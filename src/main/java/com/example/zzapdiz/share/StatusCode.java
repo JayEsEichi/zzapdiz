@@ -26,7 +26,9 @@ public enum StatusCode {
     NEED_REWARD_INFO_CHECK(462, "리워드 정보가 올바르지 않습니다."),
     TIME_LIMIT_CHECK(463, "일정 시간동안 프로젝트를 생성하지 않아 정보가 초기화되었습니다. 다시 단계 정보를 넣어주십시오."),
     CANT_PICK_MINE(464, "본인이 생성한 프로젝트는 찜하실 수 없습니다."),
-    CANT_SUPPORT_MINE(465, "본인이 생성한 프로젝트는 지지하실 수 없습니다.");
+    CANT_SUPPORT_MINE(465, "본인이 생성한 프로젝트는 지지하실 수 없습니다."),
+    NOT_CORRECT_MAKER(466, "해당 프로젝트를 만든 메이커가 아니라서 작업을 수행할 수 없습니다."),
+    EXIST_QUANTITY_THEN_CANNOT_DELETE(467, "이미 모금된 금액이 존재하기 때문에 해당 작업을 수행할 수 없습니다.");
 
 
 

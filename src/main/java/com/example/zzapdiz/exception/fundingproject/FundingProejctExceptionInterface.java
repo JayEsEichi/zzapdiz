@@ -8,11 +8,13 @@ import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase1Res
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase3ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase4ResponseDto;
+import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.share.ResponseBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,6 +54,9 @@ public interface FundingProejctExceptionInterface {
     /** OpenReservation이 O이라면 startDate 속성의 값을 기입받은 openReservationStartDate로 넣는다.
      X라면 프로젝트가 생성되어 바로 그 즉시 시점의 시간대를 startDate 속성에 넣는다. **/
     String startDateSetting(String openReservation, String openReservationStartdate);
+
+    /** 프로젝트를 생성한 메이커가 맞는지 확인 **/
+    Boolean checkProjectMaker(Member authMember, Long projectId);
 
     /** 펀딩 프로젝트 생성 마지막 최종 단계에서 반드시 기입되어야할 정보가 하나라도
      * 명확하지 않다면 에러 응답 처리 **/

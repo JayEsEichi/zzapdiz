@@ -2,6 +2,7 @@ package com.example.zzapdiz.fundingproject;
 
 import com.example.zzapdiz.fundingproject.controller.FundingProjectController;
 import com.example.zzapdiz.fundingproject.domain.FundingProject;
+import com.example.zzapdiz.fundingproject.repository.FundingProjectRepository;
 import com.example.zzapdiz.fundingproject.request.*;
 import com.example.zzapdiz.fundingproject.response.*;
 import com.example.zzapdiz.fundingproject.service.FundingProjectService;
@@ -48,6 +49,9 @@ public class FundingProjectConrollerTest {
 
     @Mock
     private FundingProjectService fundingProjectService;
+
+    @Mock
+    private FundingProjectRepository fundingProjectRepository;
 
     private MockMvc mockMvc;
 
@@ -302,6 +306,32 @@ public class FundingProjectConrollerTest {
 
     }
 
+    @DisplayName("[FundingProjectController] 펀딩 프로젝트 삭제")
+    @Test
+    void deleteProject() throws Exception{
+        // given
+        doReturn(new ResponseEntity<>(new ResponseBody<>(StatusCode.OK, "삭제 성공"), HttpStatus.OK))
+                .when(fundingProjectService)
+                .fundingProjectDelete(any(MockHttpServletRequest.class), any(Long.class));
+
+        fundingProjectRepository.save(getFakeProject());
+
+        // when
+        ResultActions resultActionsWhen = mockMvc.perform(
+                MockMvcRequestBuilders.delete("/zzapdiz/funding/delete/3")
+                        .characterEncoding("utf-8")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3bHN0cGduczUyQG5hdmVyLmNvbSIsImF1dGgiOiJVU0VSIiwiZXhwIjoxNjgxODA2MzY5fQ.TwmlBIh34ZlJYAADi2onlrzboYjTc6uPQW1f6Rjxvds")
+        );
+
+        // then
+        ResultActions resultActionsThen = resultActionsWhen
+                .andDo(print())
+                .andExpect(status().isOk());
+
+    }
+
+
     private FundingProjectCreatePhase1RequestDto phase1RequestDto() {
         return FundingProjectCreatePhase1RequestDto.builder()
                 .projectCategory("TECH")
@@ -461,6 +491,30 @@ public class FundingProjectConrollerTest {
                 .orderBy("")
                 .pageNum(1)
                 .build();
+    }
+
+    private FundingProject getFakeProject(){
+        FundingProject fakeProject = FundingProject.builder()
+                .fundingProjectId(3L)
+                .projectCategory("dd")
+                .projectType("dd")
+                .makerType("dd")
+                .achievedAmount(900)
+                .projectTitle("거짓 타이틀")
+                .endDate(LocalDateTime.now())
+                .adultCheck("X")
+                .searchTag("hh")
+                .storyText("kk")
+                .projectDescript("ll")
+                .openReservation("X")
+                .startDate(LocalDateTime.now())
+                .deliveryCheck("X")
+                .deliveryPrice(90000)
+                .deliveryStartDate(LocalDateTime.now())
+                .progress("진행중")
+                .build();
+
+        return fakeProject;
     }
 
 }

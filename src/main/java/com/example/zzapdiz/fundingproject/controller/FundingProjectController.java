@@ -1,6 +1,7 @@
 package com.example.zzapdiz.fundingproject.controller;
 
 import com.example.zzapdiz.fundingproject.request.*;
+import com.example.zzapdiz.fundingproject.response.ProjectsReadResponseDto;
 import com.example.zzapdiz.fundingproject.service.FundingProjectService;
 import com.example.zzapdiz.reward.request.RewardCreateRequestDto;
 import com.example.zzapdiz.share.ResponseBody;
@@ -95,5 +96,17 @@ public class FundingProjectController {
         log.info("펀딩 프로젝트 조회 api : 프로젝트 - {}", projectId);
 
         return fundingProjectService.fundingProjectRead(projectId);
+    }
+
+    /**
+     * 펀딩 프로젝트 목록 조회
+     * (1) 프로젝트 카테고리 / (2) 진행상황 / (3) 정렬기준 / (4) 12개씩 페이지 번호
+     * **/
+    @GetMapping("/funding/readlist")
+    public ResponseEntity<ResponseBody> fundingProjectsRead(@RequestBody ProjectsListReadRequestDto projectsListReadRequestDto){
+        log.info("펀딩 프로젝트 목록 조회 api : 카테고리 - {}, 진행상황 - {}, 정렬기준 - {}, 목록 번호 - {}",
+                projectsListReadRequestDto.getProjectCategory(), projectsListReadRequestDto.getProgress(), projectsListReadRequestDto.getOrderBy(), projectsListReadRequestDto.getPageNum());
+
+        return fundingProjectService.fundingProjectsRead(projectsListReadRequestDto);
     }
 }

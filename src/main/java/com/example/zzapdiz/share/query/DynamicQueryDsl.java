@@ -2,15 +2,13 @@ package com.example.zzapdiz.share.query;
 
 import com.example.zzapdiz.configuration.MySqlCustomTemplate;
 import com.example.zzapdiz.fundingproject.domain.FundingProject;
+import com.example.zzapdiz.fundingproject.response.ProjectsReadResponseDto;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.member.request.MemberFindRequestDto;
 import com.example.zzapdiz.reward.domain.Reward;
-import com.example.zzapdiz.reward.response.RewardInfoDto;
 import com.example.zzapdiz.share.media.Media;
-import com.example.zzapdiz.share.project.ProjectCategory;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.MathExpressions;
-import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -198,6 +198,61 @@ public class DynamicQueryDsl {
     }
 
     /**
+     * FundingProject 엔티티에 지지 수 업데이트
+     **/
+    @Transactional
+    public synchronized void supportCountUpdate(FundingProject supportProject) {
+        Long sptCnt = jpaQueryFactory
+                .select(doSupport.count())
+                .from(doSupport)
+                .where(doSupport.fundingProject.eq(supportProject))
+                .fetchOne();
+
+        int supportCount = sptCnt.intValue();
+
+        jpaQueryFactory
+                .update(fundingProject)
+                .set(fundingProject.supportCount, supportCount)
+                .where(fundingProject.fundingProjectId.eq(supportProject.getFundingProjectId()))
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE) // 비관적 락을 걸어 지지수 업데이트 동기화
+                .execute();
+
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+    /**
+     * FundingProject 엔티티에 찜하기 수 업데이트
+     **/
+    @Transactional
+    public synchronized void pickCountUpdate(FundingProject pickFundingProject) {
+        Long pickCnt = jpaQueryFactory
+                .select(pickProject.count())
+                .from(pickProject)
+                .where(pickProject.fundingProject.eq(pickFundingProject))
+                .fetchOne();
+
+        int pickCount = pickCnt.intValue();
+
+        jpaQueryFactory
+                .update(fundingProject)
+                .set(fundingProject.pickCount, pickCount)
+                .where(fundingProject.fundingProjectId.eq(pickFundingProject.getFundingProjectId()))
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE) // 비관적 락을 걸어 지지수 업데이트 동기화
+                .execute();
+
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+
+    /**
+     * 1. 프로젝트 찜하기도 우선 FundingProject 엔티티에 Count 컬럼 하나 만들어서 반영되게끔 추가 업데이트
+     * 2. 컬럼 속성 하나 만들고 펀딩 프로젝트 목록 조회 api 로직 재구성 필요!
+     * **/
+
+
+    /**
      * 지지하기 두번 활성화 시 취소
      **/
     @Transactional
@@ -301,8 +356,8 @@ public class DynamicQueryDsl {
     /**
      * 현재 조회하고 있는 프로젝트의 메이커가 만든 다른 프로젝트 목록 4개 구성
      * !! 현재 랜덤으로 뽑혀야 되는 부분은 작동되지 않고 있다. 추후 반영 필요
-     * **/
-    public List<FundingProject> getMakersOtherProjects(Member maker, Long projectId){
+     **/
+    public List<FundingProject> getMakersOtherProjects(Member maker, Long projectId) {
         List<FundingProject> makersOtherProjects = jpaQueryFactory
                 .selectFrom(fundingProject)
                 .where(fundingProject.member.eq(maker)
@@ -312,4 +367,86 @@ public class DynamicQueryDsl {
 
         return makersOtherProjects;
     }
+
+
+    /**
+     * 펀딩 프로젝트 리스트 조회
+     **/
+    public List<ProjectsReadResponseDto> getProjectList(String projectCategory, String progress, String orderBy, int page) {
+        // 스크롤할 때마다 추출될 프로젝트 개수
+        int listInPage = 12 * page;
+        // 프로젝트 목록을 담기 위한 Dto 리스트 객체
+        List<ProjectsReadResponseDto> projects = new ArrayList<>();
+
+        // 조건에 맞는 펀딩 프로젝트 리스트 목록
+        List<FundingProject> fundingProjects = jpaQueryFactory
+                .selectFrom(fundingProject)
+                .where(eqCategory(projectCategory).and(eqProgress(progress)))
+                .orderBy(eqOrderBy(orderBy))
+                .limit(listInPage)
+                .fetch();
+
+        // 조회한 펀딩 프로젝트 목록들을 ResponseDto 리스트 객체에 담기
+        for (FundingProject eachProject : fundingProjects) {
+            projects.add(ProjectsReadResponseDto.builder()
+                    .fundingProjectId(eachProject.getFundingProjectId())
+                    .projectTitle(eachProject.getProjectTitle())
+                    .reachPercentage("") // 펀딩하기 기능 구축 후 다시 업데이트
+                    .reachQuantity("")  // 펀딩하기 기능 구축 후 다시 업데이트
+                    .remainProjectDate((eachProject.getEndDate().getDayOfYear() - LocalDateTime.now().getDayOfYear()) + "일 남음.")
+                    .thumbnailImage(jpaQueryFactory
+                            .select(media.mediaUrl)
+                            .from(media)
+                            .where(media.fundingProjectId.eq(eachProject.getFundingProjectId())
+                                    .and(media.mediaPurpose.eq("thumb")))
+                            .fetchOne())
+                    .build());
+        }
+
+        return projects;
+    }
+
+    /**
+     * 프로젝트 카테고리 BooleanExpression
+     **/
+    private BooleanExpression eqCategory(String projectCategory) {
+        if (projectCategory != null) {
+            return fundingProject.projectCategory.eq(projectCategory);
+        }
+        return null;
+    }
+
+
+    /**
+     * 프로젝트 진행상황 BooleanExpression
+     **/
+    private BooleanExpression eqProgress(String progress) {
+        if (progress != null) {
+            return fundingProject.progress.eq(progress);
+        }
+        return null;
+    }
+
+
+    /**
+     * 프로젝트 정렬기준 BooleanExpression
+     * (1) 추천순 : 지지수가 많은 프로젝트부터 우선적으로 조회. ⇒ recommend
+     * (2) 인기순 : 달성율 기준으로 가장 초과 달성된 프로젝트부터 우선적으로 조회. ⇒ like
+     * (3) 모집금액순 : 달성율 + 모집된 금액이 가장 큰 프로젝트부터 우선적으로 조회. ⇒ quantity
+     * (4) 마감임박순 : 프로젝트 잔여일이 가장 적은 프로젝트부터 우선적으로 조회. ⇒ closeend
+     * (5) 최신순 : 프로젝트 생성일 최신순으로 조회. ⇒ recent
+     **/
+    private OrderSpecifier eqOrderBy(String orderBy) {
+        if (orderBy.equals("추천순")) {
+            return fundingProject.supportCount.desc();
+        } else if (orderBy.equals("인기순")) {
+            // 펀딩하기 기능 구축 후 업데이트 필요
+        } else if (orderBy.equals("모집금액순")) {
+            // 펀딩하기 기능 구축 후 업데이트 필요
+        } else if (orderBy.equals("마감임박순")) {
+
+        }
+        return fundingProject.createdAt.desc();
+    }
+
 }

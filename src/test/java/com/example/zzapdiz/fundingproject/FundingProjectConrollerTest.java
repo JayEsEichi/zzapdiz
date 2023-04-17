@@ -273,6 +273,35 @@ public class FundingProjectConrollerTest {
 
     }
 
+    @DisplayName("[FundingProjectController] 펀딩 프로젝트 목록 조회")
+    @Test
+    void readFundingProjectList() throws Exception{
+        // given
+        HashMap<String, Object> resultSet = new HashMap<>();
+        resultSet.put("resultMessage", "펀딩 프로젝트 목록 조회");
+        resultSet.put("resultInfo", projectsReadResult());
+
+        doReturn(new ResponseEntity<>(new ResponseBody<>(StatusCode.OK, resultSet), HttpStatus.OK))
+                .when(fundingProjectService)
+                .fundingProjectsRead(any(ProjectsListReadRequestDto.class));
+
+        String projectsReadRequest = new Gson().toJson(projectsRead());
+
+        // when
+        ResultActions resultActionsWhen = mockMvc.perform(
+                MockMvcRequestBuilders.get("/zzapdiz/funding/readlist")
+                        .characterEncoding("utf-8")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(projectsReadRequest)
+        );
+
+        // then
+        ResultActions resultActionsThen = resultActionsWhen
+                .andDo(print())
+                .andExpect(status().isOk());
+
+    }
+
     private FundingProjectCreatePhase1RequestDto phase1RequestDto() {
         return FundingProjectCreatePhase1RequestDto.builder()
                 .projectCategory("TECH")
@@ -413,6 +442,24 @@ public class FundingProjectConrollerTest {
 
         return ProjectReadResponseDto.builder()
                 .fundingProject(fakeProject)
+                .build();
+    }
+
+    private ProjectsListReadRequestDto projectsReadResult(){
+        return ProjectsListReadRequestDto.builder()
+                .projectCategory("테크/가전")
+                .progress("진행중")
+                .orderBy("")
+                .pageNum(1)
+                .build();
+    }
+
+    private ProjectsListReadRequestDto projectsRead(){
+        return ProjectsListReadRequestDto.builder()
+                .projectCategory("테크/가전")
+                .progress("진행중")
+                .orderBy("")
+                .pageNum(1)
                 .build();
     }
 

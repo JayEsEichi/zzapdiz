@@ -109,4 +109,12 @@ public class FundingProjectController {
 
         return fundingProjectService.fundingProjectsRead(projectsListReadRequestDto);
     }
+
+    /** 펀딩 프로젝트 삭제 **/
+    @DeleteMapping("/funding/delete/{projectId}")
+    public ResponseEntity<ResponseBody> fundingProjectDelete(HttpServletRequest request, @PathVariable Long projectId){
+        log.info("펀딩 프로젝트 삭제 api : 삭제 유저 - {}, 삭제될 프로젝트 id - {}", request, projectId);
+
+        return fundingProjectService.fundingProjectDelete(request, projectId);
+    }
 }

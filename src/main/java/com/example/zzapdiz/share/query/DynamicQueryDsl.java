@@ -449,4 +449,13 @@ public class DynamicQueryDsl {
         return fundingProject.createdAt.desc();
     }
 
+    /** 프로젝트의 현재까지 달성된 금액 정보 조회 **/
+    public Integer getCollectQuantity(Long projectId){
+        return jpaQueryFactory
+                .select(fundingProject.collectQuantity)
+                .from(fundingProject)
+                .where(fundingProject.fundingProjectId.eq(projectId))
+                .fetchOne();
+    }
+
 }

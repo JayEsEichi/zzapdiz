@@ -511,6 +511,32 @@ public class FundingProjectService {
 
         return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
     }
+
+
+    // 펀딩 프로젝트 삭제
+    public ResponseEntity<ResponseBody> fundingProjectDelete(HttpServletRequest request, Long projectId){
+
+        // 펀딩 프로젝트 삭제 요청 회원의 토큰 유효성 검증
+        if (memberExceptionInterface.checkHeaderToken(request)) {
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
+
+        // 삭제하고자 하는 유저 정보 조
+        Member authMember = jwtTokenProvider.getMemberFromAuthentication();
+
+        // 삭제하고자 하는 유저가 삭제를 하려는 프로젝트의 메이커가 맞는지 확인
+        if(!fundingProejctExceptionInterface.checkProjectMaker(authMember, projectId)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.NOT_CORRECT_MAKER, null), HttpStatus.BAD_REQUEST);
+        }
+
+        // 현재 모금된 금액이 존재한다면 프로젝트는 삭제될 수 없음.
+        if(dynamicQueryDsl.getCollectQuantity(projectId) != 0){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.EXIST_QUANTITY_THEN_CANNOT_DELETE, null), HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>(new ResponseBody(StatusCode.OK, "정상적으로 프로젝트가 삭제되었습니다. 감사합니다."), HttpStatus.OK);
+    }
+
 }
 
 

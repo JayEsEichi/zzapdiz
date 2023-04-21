@@ -37,6 +37,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static com.example.zzapdiz.share.media.QMedia.media;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -537,6 +539,43 @@ public class FundingProjectService {
         return new ResponseEntity<>(new ResponseBody(StatusCode.OK, "정상적으로 프로젝트가 삭제되었습니다. 감사합니다."), HttpStatus.OK);
     }
 
+
+    // 펀딩 프로젝트 수정
+    @Transactional
+    public ResponseEntity<ResponseBody> fundingProjectUpdate(
+            HttpServletRequest request,
+            FundingProjectUpdateRequestDto fundingProjectUpdateRequestDto,
+            MultipartFile thumbnailImage,
+            List<MultipartFile> videoAndImages){
+
+        // 펀딩 프로젝트 삭제 요청 회원의 토큰 유효성 검증
+        if (memberExceptionInterface.checkHeaderToken(request)) {
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
+
+        Member authMember = jwtTokenProvider.getMemberFromAuthentication();
+
+        // 수정하려고 하는 유저가 만든 프로젝트가 맞는지 확인
+        if(!fundingProejctExceptionInterface.checkProjectMaker(authMember, fundingProjectUpdateRequestDto.getProjectId())){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.NOT_CORRECT_MAKER, null), HttpStatus.BAD_REQUEST);
+        }
+
+        if(fundingProejctExceptionInterface.checkUpdateInfo(fundingProjectUpdateRequestDto, thumbnailImage, videoAndImages)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.CANNOT_PROJECT_UPDATE, null), HttpStatus.BAD_REQUEST);
+        }
+
+        // 수정하고자 하는 프로젝트 조회
+        FundingProject updateProject = dynamicQueryDsl.getFundingProject(fundingProjectUpdateRequestDto.getProjectId());
+
+        // 프로젝트 정보 수정
+        dynamicQueryDsl.updateProjectInfo(fundingProjectUpdateRequestDto, updateProject);
+        // 프로젝트 썸네일 이미지 수정
+        dynamicQueryDsl.updateProjectThumbnail(updateProject, thumbnailImage);
+        // 프로젝트 미디어 파일들 수정
+        dynamicQueryDsl.updateProjectMediaInfo(updateProject, videoAndImages);
+
+        return new ResponseEntity<>(new ResponseBody(StatusCode.OK, "프로젝트 정보가 정상적으로 수정되었습니다."), HttpStatus.OK);
+    }
 }
 
 

@@ -1,9 +1,6 @@
 package com.example.zzapdiz.exception.fundingproject;
 
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase1RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase2RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase3RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase4RequestDto;
+import com.example.zzapdiz.fundingproject.request.*;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase1ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase3ResponseDto;
@@ -57,6 +54,9 @@ public interface FundingProejctExceptionInterface {
 
     /** 프로젝트를 생성한 메이커가 맞는지 확인 **/
     Boolean checkProjectMaker(Member authMember, Long projectId);
+
+    /** 프로젝트를 수정할 때 수정값이 하나도 변경된 값이 없거나 null 값이면 수정할 수 없다는 읃답 처리 **/
+    Boolean checkUpdateInfo(FundingProjectUpdateRequestDto fundingProjectUpdateRequestDto, MultipartFile thumbnailImage, List<MultipartFile> videoAndImages);
 
     /** 펀딩 프로젝트 생성 마지막 최종 단계에서 반드시 기입되어야할 정보가 하나라도
      * 명확하지 않다면 에러 응답 처리 **/

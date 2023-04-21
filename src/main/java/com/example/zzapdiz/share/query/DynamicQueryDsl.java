@@ -2,11 +2,13 @@ package com.example.zzapdiz.share.query;
 
 import com.example.zzapdiz.configuration.MySqlCustomTemplate;
 import com.example.zzapdiz.fundingproject.domain.FundingProject;
+import com.example.zzapdiz.fundingproject.request.FundingProjectUpdateRequestDto;
 import com.example.zzapdiz.fundingproject.response.ProjectsReadResponseDto;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.member.request.MemberFindRequestDto;
 import com.example.zzapdiz.reward.domain.Reward;
 import com.example.zzapdiz.share.media.Media;
+import com.example.zzapdiz.share.media.MediaUploadInterface;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -20,6 +22,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +41,7 @@ public class DynamicQueryDsl {
 
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
-
+    private final MediaUploadInterface mediaUploadInterface;
 
     /**
      * 조건에 따른 회원 정보 조회 동적 쿼리
@@ -449,13 +452,187 @@ public class DynamicQueryDsl {
         return fundingProject.createdAt.desc();
     }
 
-    /** 프로젝트의 현재까지 달성된 금액 정보 조회 **/
-    public Integer getCollectQuantity(Long projectId){
+    /**
+     * 프로젝트의 현재까지 달성된 금액 정보 조회
+     **/
+    public Integer getCollectQuantity(Long projectId) {
         return jpaQueryFactory
                 .select(fundingProject.collectQuantity)
                 .from(fundingProject)
                 .where(fundingProject.fundingProjectId.eq(projectId))
                 .fetchOne();
+    }
+
+    /**
+     * 프로젝트 정보 수정
+     **/
+    @Transactional
+    public void updateProjectInfo(FundingProjectUpdateRequestDto fundingProjectUpdateRequestDto, FundingProject updateProject) {
+
+        // 프로젝트 타이틀 명이 변경되었다면 수정
+        if (fundingProjectUpdateRequestDto.getProjectTitle() != null && !fundingProjectUpdateRequestDto.getProjectTitle().equals(updateProject.getProjectTitle())) {
+            jpaQueryFactory
+                    .update(fundingProject)
+                    .set(fundingProject.projectTitle, fundingProjectUpdateRequestDto.getProjectTitle())
+                    .where(fundingProject.fundingProjectId.eq(fundingProjectUpdateRequestDto.getProjectId()))
+                    .execute();
+        }
+
+        // 프로젝트 목표 금액 정보가 변경되었다면 수정
+        if (fundingProjectUpdateRequestDto.getAchievedAmount() != 0 && !(fundingProjectUpdateRequestDto.getAchievedAmount() == updateProject.getAchievedAmount())) {
+            jpaQueryFactory
+                    .update(fundingProject)
+                    .set(fundingProject.achievedAmount, fundingProjectUpdateRequestDto.getAchievedAmount())
+                    .where(fundingProject.fundingProjectId.eq(fundingProjectUpdateRequestDto.getProjectId()))
+                    .execute();
+        }
+
+        // 프로젝트 검색 태그 정보가 변경되었다면 수정
+        if (fundingProjectUpdateRequestDto.getSearchTag() != null && !fundingProjectUpdateRequestDto.getSearchTag().equals(updateProject.getSearchTag())) {
+            jpaQueryFactory
+                    .update(fundingProject)
+                    .set(fundingProject.searchTag, fundingProjectUpdateRequestDto.getSearchTag())
+                    .where(fundingProject.fundingProjectId.eq(fundingProjectUpdateRequestDto.getProjectId()))
+                    .execute();
+        }
+
+        // 프로젝트 스토리 글이 변경되었다면 수정
+        if (fundingProjectUpdateRequestDto.getStoryText() != null && !fundingProjectUpdateRequestDto.getStoryText().equals(updateProject.getStoryText())) {
+            jpaQueryFactory
+                    .update(fundingProject)
+                    .set(fundingProject.storyText, fundingProjectUpdateRequestDto.getStoryText())
+                    .where(fundingProject.fundingProjectId.eq(fundingProjectUpdateRequestDto.getProjectId()))
+                    .execute();
+        }
+
+        // 프로젝트 상세 설명 정보가 변경되었다면 수정
+        if (fundingProjectUpdateRequestDto.getProjectDescript() != null && !fundingProjectUpdateRequestDto.getProjectDescript().equals(updateProject.getProjectDescript())) {
+            jpaQueryFactory
+                    .update(fundingProject)
+                    .set(fundingProject.projectDescript, fundingProjectUpdateRequestDto.getProjectDescript())
+                    .where(fundingProject.fundingProjectId.eq(fundingProjectUpdateRequestDto.getProjectId()))
+                    .execute();
+        }
+
+        // 프로젝트 종료일 정보가 변경되었다면 수정
+        if (fundingProjectUpdateRequestDto.getEndDate() != null && !fundingProjectUpdateRequestDto.getEndDate().equals("")) {
+            log.info("종료일 조건 미달성인데 해당 조건에 들어오게 될 경우");
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime endDate = LocalDateTime.parse(fundingProjectUpdateRequestDto.getEndDate(), formatter);
+
+            if (!updateProject.getEndDate().equals(endDate)) {
+                jpaQueryFactory
+                        .update(fundingProject)
+                        .set(fundingProject.endDate, endDate)
+                        .where(fundingProject.fundingProjectId.eq(fundingProjectUpdateRequestDto.getProjectId()))
+                        .execute();
+            }
+        }
+
+        // 배송 여부가 변경되었다면 수정
+        if (fundingProjectUpdateRequestDto.getDeliveryCheck() != null && !fundingProjectUpdateRequestDto.getDeliveryCheck().equals(updateProject.getDeliveryCheck())) {
+            jpaQueryFactory
+                    .update(fundingProject)
+                    .set(fundingProject.deliveryCheck, fundingProjectUpdateRequestDto.getDeliveryCheck())
+                    .where(fundingProject.fundingProjectId.eq(fundingProjectUpdateRequestDto.getProjectId()))
+                    .execute();
+        }
+
+        // 배송 가격이 변경되었다면 수정
+        if (fundingProjectUpdateRequestDto.getDeliveryPrice() != 0 && !(fundingProjectUpdateRequestDto.getDeliveryPrice() == updateProject.getDeliveryPrice())) {
+            jpaQueryFactory
+                    .update(fundingProject)
+                    .set(fundingProject.deliveryPrice, fundingProjectUpdateRequestDto.getDeliveryPrice())
+                    .where(fundingProject.fundingProjectId.eq(fundingProjectUpdateRequestDto.getProjectId()))
+                    .execute();
+        }
+
+        // 배송 시작일 정보가 변경 되었다면 수정
+        if (fundingProjectUpdateRequestDto.getDeliveryStartDate() != null && !fundingProjectUpdateRequestDto.getDeliveryStartDate().equals("")) {
+            log.info("배달 시작일 조건 미달성인데 해당 조건에 들어오게 될 경우");
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime deliveryStartDate = LocalDateTime.parse(fundingProjectUpdateRequestDto.getDeliveryStartDate(), formatter);
+
+            if (!updateProject.getDeliveryStartDate().equals(deliveryStartDate)) {
+                jpaQueryFactory
+                        .update(fundingProject)
+                        .set(fundingProject.deliveryStartDate, deliveryStartDate)
+                        .where(fundingProject.fundingProjectId.eq(fundingProjectUpdateRequestDto.getProjectId()))
+                        .execute();
+            }
+        }
+
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+    /**
+     * 프로젝트에 속한 썸네일 이미지 수정
+     **/
+    @Transactional
+    public void updateProjectThumbnail(FundingProject updateProject, MultipartFile thumbnailImage) {
+
+        if (thumbnailImage != null) {
+            jpaQueryFactory
+                    .delete(media)
+                    .where(media.fundingProjectId.eq(updateProject.getFundingProjectId())
+                            .and(media.mediaPurpose.eq("thumb")))
+                    .execute();
+
+            mediaUploadInterface.uploadMedia(thumbnailImage, "thumb", updateProject.getProjectTitle());
+
+            jpaQueryFactory
+                    .update(media)
+                    .set(media.fundingProjectId, updateProject.getFundingProjectId())
+                    .where(media.projectTitle.eq(updateProject.getProjectTitle()).and(media.mediaPurpose.eq("thumb")))
+                    .execute();
+
+            entityManager.flush();
+            entityManager.clear();
+        }
+    }
+
+    /**
+     * 프로젝트에 속한 비디오 및 이미지 수정
+     **/
+    @Transactional
+    public void updateProjectMediaInfo(FundingProject updateProject, List<MultipartFile> videoAndImages) {
+
+        if (videoAndImages.size() != 0) {
+            List<String> mediaOriginalNameList = jpaQueryFactory
+                    .select(media.mediaRealName)
+                    .from(media)
+                    .where(media.fundingProjectId.eq(updateProject.getFundingProjectId()))
+                    .fetch();
+
+            // s3에 저장되어 있는 이미지 정보들 삭제
+            for(String eachMediaName : mediaOriginalNameList){
+                mediaUploadInterface.deleteFile(eachMediaName);
+            }
+
+            jpaQueryFactory
+                    .delete(media)
+                    .where(media.fundingProjectId.eq(updateProject.getFundingProjectId())
+                            .and(media.mediaPurpose.eq("story")))
+                    .execute();
+
+            // 새로 저장될 이미지 정보
+            for (MultipartFile eachMultiPartFile : videoAndImages) {
+                mediaUploadInterface.uploadMedia(eachMultiPartFile, "story", updateProject.getProjectTitle());
+            }
+
+            jpaQueryFactory
+                    .update(media)
+                    .set(media.fundingProjectId, updateProject.getFundingProjectId())
+                    .where(media.projectTitle.eq(updateProject.getProjectTitle()).and(media.mediaPurpose.eq("story")))
+                    .execute();
+
+            entityManager.flush();
+            entityManager.clear();
+        }
+
     }
 
 }

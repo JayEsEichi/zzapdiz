@@ -31,7 +31,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -331,6 +333,35 @@ public class FundingProjectConrollerTest {
 
     }
 
+    @DisplayName("[FundingProjectController] 펀딩 프로젝트 수정")
+    @Test
+    void updateProject() throws Exception {
+        // given
+        doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, "정상적으로 프로젝트가 수정되었습니다."), HttpStatus.OK))
+                .when(fundingProjectService)
+                .fundingProjectUpdate(any(MockHttpServletRequest.class), any(FundingProjectUpdateRequestDto.class), any(MultipartFile.class), anyList());
+
+        fundingProjectRepository.save(getFakeProject());
+
+        String updateInfo = new Gson().toJson(updateRequestDto());
+
+        // when
+        ResultActions resultActionsWhen = mockMvc.perform(
+                MockMvcRequestBuilders.put("/zzapdiz/funding/update")
+                        .characterEncoding("utf-8")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3bHN0cGduczUyQG5hdmVyLmNvbSIsImF1dGgiOiJVU0VSIiwiZXhwIjoxNjgyMTM1NzM1fQ.2g-RKbaq01i2hOChlyhXj3iDz5tQvZ1wvql1nLbYeKw")
+                        .content(updateInfo)
+        );
+
+        // then
+        ResultActions resultActionsThen = resultActionsWhen
+                .andDo(print())
+                .andExpect(status().isOk());
+
+    }
+
 
     private FundingProjectCreatePhase1RequestDto phase1RequestDto() {
         return FundingProjectCreatePhase1RequestDto.builder()
@@ -517,4 +548,18 @@ public class FundingProjectConrollerTest {
         return fakeProject;
     }
 
+    private FundingProjectUpdateRequestDto updateRequestDto(){
+        return FundingProjectUpdateRequestDto.builder()
+                .projectId(3L)
+                .projectTitle("mock 프로젝트 타이틀 제목 수정")
+                .achievedAmount(89000000)
+                .searchTag("#mockito 수정 검색 태그")
+                .storyText("mockito 스토리 글 수정")
+                .projectDescript("mockito 스토리 요약 설명 수정")
+                .endDate("")
+                .deliveryCheck("X")
+                .deliveryPrice(0)
+                .deliveryStartDate("")
+                .build();
+    }
 }

@@ -1,9 +1,6 @@
 package com.example.zzapdiz.exception.fundingproject;
 
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase1RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase2RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase3RequestDto;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase4RequestDto;
+import com.example.zzapdiz.fundingproject.request.*;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase1ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase2ResponseDto;
 import com.example.zzapdiz.fundingproject.response.FundingProjectCreatePhase3ResponseDto;
@@ -30,12 +27,12 @@ public class FundingProjectException implements FundingProejctExceptionInterface
     // 펀딩 프로젝트 생성 1단계 기입 정보들 확인
     @Override
     public Boolean checkPhase1Info(FundingProjectCreatePhase1RequestDto fundingProjectCreatePhase1RequestDto) {
-        if(fundingProjectCreatePhase1RequestDto.getProjectCategory() == null ||
-        fundingProjectCreatePhase1RequestDto.getProjectType() == null ||
-        fundingProjectCreatePhase1RequestDto.getMakerType() == null ||
-        fundingProjectCreatePhase1RequestDto.getRewardType() == null ||
-        fundingProjectCreatePhase1RequestDto.getRewardMakeType() == null ||
-        fundingProjectCreatePhase1RequestDto.getAchievedAmount() == 0){
+        if (fundingProjectCreatePhase1RequestDto.getProjectCategory() == null ||
+                fundingProjectCreatePhase1RequestDto.getProjectType() == null ||
+                fundingProjectCreatePhase1RequestDto.getMakerType() == null ||
+                fundingProjectCreatePhase1RequestDto.getRewardType() == null ||
+                fundingProjectCreatePhase1RequestDto.getRewardMakeType() == null ||
+                fundingProjectCreatePhase1RequestDto.getAchievedAmount() == 0) {
             return true;
         }
 
@@ -73,7 +70,7 @@ public class FundingProjectException implements FundingProejctExceptionInterface
     @Override
     public Boolean checkPhase4Info(FundingProjectCreatePhase4RequestDto fundingProjectCreatePhase4RequestDto) {
         if (fundingProjectCreatePhase4RequestDto.getDeliveryCheck() == null ||
-        fundingProjectCreatePhase4RequestDto.getDeliveryStartDate() == null) {
+                fundingProjectCreatePhase4RequestDto.getDeliveryStartDate() == null) {
             return true;
         }
 
@@ -83,10 +80,10 @@ public class FundingProjectException implements FundingProejctExceptionInterface
     // 펀딩 프로젝트 중복 타이틀 확인
     @Override
     public Boolean checkDuplicatedTitle(String projectTitle) {
-        if(jpaQueryFactory
+        if (jpaQueryFactory
                 .selectFrom(fundingProject)
                 .where(fundingProject.projectTitle.eq(projectTitle))
-                .fetchOne() != null){
+                .fetchOne() != null) {
             return true;
         }
 
@@ -98,7 +95,7 @@ public class FundingProjectException implements FundingProejctExceptionInterface
     public Boolean checkAllPhase(
             Optional<FundingProjectCreatePhase1ResponseDto> phase1, Optional<FundingProjectCreatePhase2ResponseDto> phase2,
             Optional<FundingProjectCreatePhase3ResponseDto> phase3, Optional<FundingProjectCreatePhase4ResponseDto> phase4) {
-        if(phase1.isEmpty() || phase2.isEmpty() || phase3.isEmpty() || phase4.isEmpty()){
+        if (phase1.isEmpty() || phase2.isEmpty() || phase3.isEmpty() || phase4.isEmpty()) {
             return true;
         }
 
@@ -108,14 +105,15 @@ public class FundingProjectException implements FundingProejctExceptionInterface
 
     // 특정 값이 반환되야하는 예외 처리일 경우
     // 배송 여부 확인 후 특정배송 시 최소 3000원 배송비 포함, 특정배송이 아닌 기본배송일 경우 배송비 0원 반환
-    public int deliveryChecking(String deliveryCheck){
+    @Override
+    public int deliveryChecking(String deliveryCheck) {
         int deliveryPrice = 0;
 
-        if(deliveryCheck.equals("O")){
+        if (deliveryCheck.equals("O")) {
             deliveryPrice = 3000;
 
             return deliveryPrice;
-        }else{
+        } else {
             return deliveryPrice;
         }
     }
@@ -123,12 +121,13 @@ public class FundingProjectException implements FundingProejctExceptionInterface
 
     // OpenReservation이 O이라면 startDate 속성의 값을 기입받은 openReservationStartDate로 넣는다.
     // X라면 프로젝트가 생성되 바로 그 즉시 시점의 시간대를 startDate 속성에 넣는다.
-    public String startDateSetting(String openReservation, String openReservationStartdate){
+    @Override
+    public String startDateSetting(String openReservation, String openReservationStartdate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        if (openReservation.equals("X")){
+        if (openReservation.equals("X")) {
             return LocalDateTime.now().format(formatter);
-        }else{
+        } else {
             return openReservationStartdate;
         }
     }
@@ -137,15 +136,27 @@ public class FundingProjectException implements FundingProejctExceptionInterface
     @Override
     public Boolean checkProjectMaker(Member authMember, Long projectId) {
 
-        if(jpaQueryFactory
+        if (jpaQueryFactory
                 .selectFrom(fundingProject)
                 .where(fundingProject.fundingProjectId.eq(projectId)
-                        .and(fundingProject.member.eq(authMember))) != null){
+                        .and(fundingProject.member.eq(authMember))) != null) {
             return true;
         }
 
         return false;
     }
 
+    // 프로젝트 수정 정보가 전부 없거나 null일 경우 수정할 수 없음
+    @Override
+    public Boolean checkUpdateInfo(FundingProjectUpdateRequestDto fundingProjectUpdateRequestDto, MultipartFile thumbnailImage, List<MultipartFile> videoAndImages) {
+
+        if (fundingProjectUpdateRequestDto == null &&
+                thumbnailImage == null &&
+                videoAndImages.size() == 0) {
+            return true;
+        }
+
+        return false;
+    }
 
 }

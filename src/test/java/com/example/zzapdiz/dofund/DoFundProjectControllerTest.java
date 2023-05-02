@@ -3,8 +3,8 @@ package com.example.zzapdiz.dofund;
 import com.example.zzapdiz.dofundproject.controller.DoFundController;
 import com.example.zzapdiz.dofundproject.repository.DoFundPhase1Repository;
 import com.example.zzapdiz.dofundproject.request.DoFundPhase1RequestDto;
+import com.example.zzapdiz.dofundproject.request.DoFundPhase2RequestDto;
 import com.example.zzapdiz.dofundproject.service.DoFundService;
-import com.example.zzapdiz.fundingproject.request.FundingProjectCreatePhase1RequestDto;
 import com.example.zzapdiz.share.ResponseBody;
 import com.example.zzapdiz.share.StatusCode;
 import com.google.gson.Gson;
@@ -24,7 +24,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.bind.annotation.RequestPart;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-public class doFundProjectControllerTest {
+public class DoFundProjectControllerTest {
 
     @InjectMocks
     private DoFundController doFundController;
@@ -93,10 +92,50 @@ public class doFundProjectControllerTest {
     }
 
 
+    @DisplayName("[DoFundProjectController] 펀딩하기 2단계 api")
+    @Test
+    void createFundingPhase2() throws Exception {
+        // given
+        HashMap<String, Object> resultSet = new HashMap<>();
+        resultSet.put("resultMessage", "펀딩하기 2단계 성공");
+        resultSet.put("resultData", getPhase2Request());
+
+        doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK))
+                .when(doFundService)
+                .doFundPhase2(any(MockHttpServletRequest.class), any(DoFundPhase2RequestDto.class));
+
+        String phase2Info = new Gson().toJson(getPhase2Request());
+
+        // when
+        ResultActions resultActionsWhen = mockMvc.perform(
+                MockMvcRequestBuilders.post("/zzapdiz/dofund/phase2")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3bHN0cGduczUyQG5hdmVyLmNvbSIsImF1dGgiOiJVU0VSIiwiZXhwIjoxNjgzMDg3MjI0fQ.GIgtrWM3soTMojMZfXSHwPUQ3dXK-J1a44vGlBpbt14")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding("utf-8")
+                        .content(phase2Info));
+
+        // then
+        ResultActions resultActionsThen = resultActionsWhen
+                .andDo(print())
+                .andExpect(status().isOk());
+
+    }
+
+
    private DoFundPhase1RequestDto getPhase1Request(Long rewardId){
         return DoFundPhase1RequestDto.builder()
                 .fundingProjectId(1L)
                 .rewardId(rewardId)
+                .build();
+   }
+
+   private DoFundPhase2RequestDto getPhase2Request(){
+        return DoFundPhase2RequestDto.builder()
+                .address("강서구")
+                .phoneNumber("01022225555")
+                .couponId(null)
+                .point(null)
+                .donation(null)
                 .build();
    }
 

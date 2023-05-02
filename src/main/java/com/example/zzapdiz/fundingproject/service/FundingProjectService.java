@@ -37,8 +37,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static com.example.zzapdiz.share.media.QMedia.media;
-
 @Slf4j
 @RequiredArgsConstructor
 @Service

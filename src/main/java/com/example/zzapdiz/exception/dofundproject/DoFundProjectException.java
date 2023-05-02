@@ -1,6 +1,7 @@
 package com.example.zzapdiz.exception.dofundproject;
 
 import com.example.zzapdiz.dofundproject.request.DoFundPhase1RequestDto;
+import com.example.zzapdiz.dofundproject.request.DoFundPhase2RequestDto;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,20 @@ public class DoFundProjectException implements DoFundProjectExceptionInterface {
 
         return true;
     }
+
+    // 펀딩하기 2단계 정보 확인
+    @Override
+    public Boolean checkDoFundPhase2Info(DoFundPhase2RequestDto doFundPhase2RequestDto) {
+
+        if (doFundPhase2RequestDto.getAddress() == null || doFundPhase2RequestDto.getAddress().equals("") ||
+        doFundPhase2RequestDto.getPhoneNumber() == null || doFundPhase2RequestDto.getPhoneNumber().equals("") ||
+        doFundPhase2RequestDto.getPhoneNumber().length() != 11) {
+            return false;
+        }
+
+        return true;
+    }
+
 
     // 펀딩 메이커가 자기 자신의 프로젝트를 펀딩하고 있는지 확인
     @Override

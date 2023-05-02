@@ -1,8 +1,11 @@
 package com.example.zzapdiz.dofundproject.service;
 
 import com.example.zzapdiz.dofundproject.repository.DoFundPhase1Repository;
+import com.example.zzapdiz.dofundproject.repository.DoFundPhase2Repository;
 import com.example.zzapdiz.dofundproject.request.DoFundPhase1RequestDto;
+import com.example.zzapdiz.dofundproject.request.DoFundPhase2RequestDto;
 import com.example.zzapdiz.dofundproject.response.DoFundPhase1ResponseDto;
+import com.example.zzapdiz.dofundproject.response.DoFundPhase2ResponseDto;
 import com.example.zzapdiz.exception.dofundproject.DoFundProjectException;
 import com.example.zzapdiz.exception.member.MemberExceptionInterface;
 import com.example.zzapdiz.jwt.JwtTokenProvider;
@@ -23,6 +26,7 @@ import java.util.*;
 public class DoFundService {
 
     private final DoFundPhase1Repository doFundPhase1Repository;
+    private final DoFundPhase2Repository doFundPhase2Repository;
     private final MemberExceptionInterface memberExceptionInterface;
     private final DoFundProjectException doFundProjectException;
     private final JwtTokenProvider jwtTokenProvider;
@@ -49,7 +53,7 @@ public class DoFundService {
         }
 
         // 펀딩하기 1단계 정보가 존재하는 상태에서 다시 펀딩하기 1단계를 진행할 경우 기존 데이터 삭제
-        if(doFundPhase1Repository.findAllByMemberIdAndFundingProjectId(memberId, doFundPhase1RequestDtos.get(0).getFundingProjectId()).isPresent()){
+        if (doFundPhase1Repository.findAllByMemberIdAndFundingProjectId(memberId, doFundPhase1RequestDtos.get(0).getFundingProjectId()).isPresent()) {
             doFundPhase1Repository.deleteAllById(Collections.singleton(memberId));
         }
 
@@ -74,6 +78,47 @@ public class DoFundService {
         HashMap<String, Object> resultSet = new HashMap<>();
         resultSet.put("resultMessage", "펀딩하기 1단계 성공");
         resultSet.put("resultData", phase1InfoList);
+
+        return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
+    }
+
+    // 펀딩하기 2단계
+    public ResponseEntity<ResponseBody> doFundPhase2(HttpServletRequest request, DoFundPhase2RequestDto doFundPhase2RequestDto) {
+
+        // 펀딩하는 회원의 토큰 유효성 검증
+        if (memberExceptionInterface.checkHeaderToken(request)) {
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
+
+        // 펀딩하기 2단계 정보 확인
+        if (!doFundProjectException.checkDoFundPhase2Info(doFundPhase2RequestDto)) {
+            return new ResponseEntity<>(new ResponseBody(StatusCode.INCORRECTABLE_DOFUND_INFO, null), HttpStatus.BAD_REQUEST);
+        }
+
+        // 펀딩하고자 하는 유저의 ID
+        Long memberId = jwtTokenProvider.getMemberFromAuthentication().getMemberId();
+
+        // 펀딩하기 2단계 정보가 존재하는 상태에서 다시 펀딩하기 2단계를 진행할 경우 기존 데이터 삭제
+        if (doFundPhase2Repository.findAllByMemberId(memberId).isPresent()) {
+            doFundPhase2Repository.deleteById(memberId);
+        }
+
+        // 펀딩하기 2단계 정보 객체에 저장
+        DoFundPhase2ResponseDto phase2 = DoFundPhase2ResponseDto.builder()
+                .memberId(memberId)
+                .point(doFundPhase2RequestDto.getPoint())
+                .address(doFundPhase2RequestDto.getAddress())
+                .phoneNumber(doFundPhase2RequestDto.getPhoneNumber())
+                .couponId(doFundPhase2RequestDto.getCouponId())
+                .donation(doFundPhase2RequestDto.getDonation())
+                .build();
+
+        // 2단계 정보들 저장
+        doFundPhase2Repository.save(phase2);
+
+        HashMap<String, Object> resultSet = new HashMap<>();
+        resultSet.put("resultMessage", "펀딩하기 2단계 성공");
+        resultSet.put("resultData", phase2);
 
         return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
     }

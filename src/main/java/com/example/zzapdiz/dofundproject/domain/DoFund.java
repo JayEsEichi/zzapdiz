@@ -4,12 +4,14 @@ import com.example.zzapdiz.fundingproject.domain.FundingProject;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.reward.domain.Reward;
 import com.example.zzapdiz.share.Timestamped;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,15 +39,16 @@ public class DoFund extends Timestamped {
     @Column
     private int donation;
 
-    @JoinColumn(name = "memberId")
-    @ManyToOne
+    @Column(nullable = false)
+    private Long fundingProjectId;
+
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @JoinColumn(name = "rewardId")
-    @ManyToOne
-    private Reward reward;
+    @JsonIgnore
+    @OneToMany(mappedBy = "doFund", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reward> rewards;
 
-    @JoinColumn(name = "fundingProjectId")
-    @ManyToOne
-    private FundingProject fundingProject;
+
 }

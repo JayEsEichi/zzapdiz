@@ -1,5 +1,6 @@
 package com.example.zzapdiz.member.domain;
 
+import com.example.zzapdiz.dofundproject.domain.DoFund;
 import com.example.zzapdiz.fundingproject.domain.FundingProject;
 import com.example.zzapdiz.pickproject.domain.PickProject;
 import com.example.zzapdiz.share.Timestamped;
@@ -54,5 +55,8 @@ public class Member extends Timestamped {
     @OneToMany(mappedBy = "member")
     private List<DoSupport> doSupports;
 
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    private DoFund doFund;
 
 }

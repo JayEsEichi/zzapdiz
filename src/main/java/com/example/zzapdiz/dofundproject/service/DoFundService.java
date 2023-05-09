@@ -1,24 +1,35 @@
 package com.example.zzapdiz.dofundproject.service;
 
+import com.example.zzapdiz.dofundproject.domain.DoFund;
 import com.example.zzapdiz.dofundproject.repository.DoFundPhase1Repository;
 import com.example.zzapdiz.dofundproject.repository.DoFundPhase2Repository;
+import com.example.zzapdiz.dofundproject.repository.DoFundRepository;
 import com.example.zzapdiz.dofundproject.request.DoFundPhase1RequestDto;
 import com.example.zzapdiz.dofundproject.request.DoFundPhase2RequestDto;
+import com.example.zzapdiz.dofundproject.request.InputQuantityDto;
 import com.example.zzapdiz.dofundproject.response.DoFundPhase1ResponseDto;
 import com.example.zzapdiz.dofundproject.response.DoFundPhase2ResponseDto;
 import com.example.zzapdiz.exception.dofundproject.DoFundProjectException;
 import com.example.zzapdiz.exception.member.MemberExceptionInterface;
 import com.example.zzapdiz.jwt.JwtTokenProvider;
+import com.example.zzapdiz.member.domain.Member;
+import com.example.zzapdiz.reward.domain.Reward;
 import com.example.zzapdiz.share.ResponseBody;
 import com.example.zzapdiz.share.StatusCode;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+
+import static com.example.zzapdiz.reward.domain.QReward.reward;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -27,9 +38,12 @@ public class DoFundService {
 
     private final DoFundPhase1Repository doFundPhase1Repository;
     private final DoFundPhase2Repository doFundPhase2Repository;
+    private final DoFundRepository doFundRepository;
     private final MemberExceptionInterface memberExceptionInterface;
     private final DoFundProjectException doFundProjectException;
     private final JwtTokenProvider jwtTokenProvider;
+    private final JPAQueryFactory jpaQueryFactory;
+    private final EntityManager entityManager;
 
     // 펀딩하기 1단계
     public ResponseEntity<ResponseBody> doFundPhase1(HttpServletRequest request, List<DoFundPhase1RequestDto> doFundPhase1RequestDtos) {
@@ -82,6 +96,7 @@ public class DoFundService {
         return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
     }
 
+
     // 펀딩하기 2단계
     public ResponseEntity<ResponseBody> doFundPhase2(HttpServletRequest request, DoFundPhase2RequestDto doFundPhase2RequestDto) {
 
@@ -119,6 +134,86 @@ public class DoFundService {
         HashMap<String, Object> resultSet = new HashMap<>();
         resultSet.put("resultMessage", "펀딩하기 2단계 성공");
         resultSet.put("resultData", phase2);
+
+        return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
+    }
+
+
+    // 펀딩하기 3단계
+    @Transactional
+    public synchronized ResponseEntity<ResponseBody> doFundPhase3(HttpServletRequest request, InputQuantityDto inputQuantityDto) {
+
+        // 펀딩하는 회원의 토큰 유효성 검증
+        if (memberExceptionInterface.checkHeaderToken(request)) {
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
+
+        // 펀딩하고자 하는 유저의 ID
+        Member authMember = jwtTokenProvider.getMemberFromAuthentication();
+
+        // 펀딩 진행중인 데이터 정보들 불러오기
+        List<DoFundPhase1ResponseDto> phase1Info = (List<DoFundPhase1ResponseDto>) doFundPhase1Repository.findAllById(Collections.singleton(authMember.getMemberId()));
+        Optional<DoFundPhase2ResponseDto> phase2Info = doFundPhase2Repository.findById(authMember.getMemberId());
+
+        // 현재 진행 중인 전체 펀딩하기 데이터 확인
+        if (doFundProjectException.checkAllPhase(phase1Info, phase2Info)) {
+            return new ResponseEntity<>(new ResponseBody(StatusCode.NOT_EXIST_FUND_DATA, null), HttpStatus.BAD_REQUEST);
+        }
+
+        int fundRewardTotalQuantity = 0;
+        List<Reward> fundRewardList = new ArrayList<>();
+
+        for (DoFundPhase1ResponseDto phase1Data : phase1Info) {
+
+            Reward fundReward = jpaQueryFactory
+                    .selectFrom(reward)
+                    .where(reward.rewardId.eq(phase1Data.getRewardId()))
+                    .fetchOne();
+
+            fundRewardList.add(fundReward);
+
+            fundRewardTotalQuantity = fundRewardTotalQuantity + fundReward.getRewardQuantity();
+        }
+
+        // 펀딩하고자 하는 총 리워드 금액보다 입력한 결제 금액이 작으면 결제 불가 처리
+        if(doFundProjectException.checkInputQuantity(inputQuantityDto.getQuantity(), fundRewardTotalQuantity)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.CANT_FUNDING, null), HttpStatus.BAD_REQUEST);
+        }
+
+        DoFund doFund = DoFund.builder()
+                .doFundQuantity(fundRewardTotalQuantity)
+                .phoneNumber(phase2Info.get().getPhoneNumber())
+                .address(phase2Info.get().getAddress())
+                .point(phase2Info.get().getPoint())
+                .donation(phase2Info.get().getDonation() + (inputQuantityDto.getQuantity() - fundRewardTotalQuantity))
+                .member(authMember)
+                .fundingProjectId(phase1Info.get(0).getFundingProjectId())
+                .rewards(fundRewardList)
+                .build();
+
+        doFundRepository.save(doFund);
+
+        // 펀딩에 성공하면 리워드 수량 1개씩 제거 (락을 걸어 동시성 이슈 제거)
+        for(Reward eachReward : fundRewardList){
+            int updateAmount = eachReward.getRewardAmount() - 1;
+
+            jpaQueryFactory
+                    .update(reward)
+                    .set(reward.rewardAmount, updateAmount)
+                    .where(reward.rewardId.eq(eachReward.getRewardId()))
+                    .execute();
+
+            entityManager.flush();
+            entityManager.clear();
+        }
+
+        // 남아있는 임시저장된 Redis 객체들, 펀딩 정보들 삭제
+        doFundPhase1Repository.deleteAllById(Collections.singleton(authMember.getMemberId()));
+        doFundPhase2Repository.deleteById(authMember.getMemberId());
+
+        HashMap<String, Object> resultSet = new HashMap<>();
+        resultSet.put("resultMessage", "마지막 최종 펀딩 성공");
+        resultSet.put("resultData", doFund);
 
         return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
     }

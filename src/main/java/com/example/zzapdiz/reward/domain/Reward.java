@@ -1,5 +1,6 @@
 package com.example.zzapdiz.reward.domain;
 
+import com.example.zzapdiz.dofundproject.domain.DoFund;
 import com.example.zzapdiz.fundingproject.domain.FundingProject;
 import com.example.zzapdiz.rewardoption.domain.RewardOption;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -47,4 +48,9 @@ public class Reward {
 
     @OneToMany(mappedBy = "reward", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RewardOption> rewardOptions;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "doFundId")
+    private DoFund doFund;
 }

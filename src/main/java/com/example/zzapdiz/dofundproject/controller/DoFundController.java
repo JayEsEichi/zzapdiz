@@ -2,6 +2,7 @@ package com.example.zzapdiz.dofundproject.controller;
 
 import com.example.zzapdiz.dofundproject.request.DoFundPhase1RequestDto;
 import com.example.zzapdiz.dofundproject.request.DoFundPhase2RequestDto;
+import com.example.zzapdiz.dofundproject.request.InputQuantityDto;
 import com.example.zzapdiz.dofundproject.service.DoFundService;
 import com.example.zzapdiz.share.ResponseBody;
 import com.google.gson.Gson;
@@ -39,6 +40,16 @@ public class DoFundController {
         log.info("펀딩하기 2단계 : 펀딩하는 유저 - {}, 펀딩 2단계 정보 - {}", request, new Gson().toJson(doFundPhase2RequestDto));
 
         return doFundService.doFundPhase2(request, doFundPhase2RequestDto);
+    }
+
+    // 펀딩하기 3단계
+    @PostMapping("/dofund/phase3")
+    public ResponseEntity<ResponseBody> doFundPhase3(
+            HttpServletRequest request,
+            @RequestBody InputQuantityDto inputQuantityDto){
+        log.info("펀딩하기 3단계 : 펀딩하는 유저 - {}", request);
+
+        return doFundService.doFundPhase3(request, inputQuantityDto);
     }
 
 }

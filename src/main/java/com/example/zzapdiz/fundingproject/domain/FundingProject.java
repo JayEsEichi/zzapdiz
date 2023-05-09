@@ -1,5 +1,6 @@
 package com.example.zzapdiz.fundingproject.domain;
 
+import com.example.zzapdiz.dofundproject.domain.DoFund;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.pickproject.domain.PickProject;
 import com.example.zzapdiz.reward.domain.Reward;

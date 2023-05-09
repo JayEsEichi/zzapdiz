@@ -31,7 +31,10 @@ public enum StatusCode {
     EXIST_QUANTITY_THEN_CANNOT_DELETE(467, "이미 모금된 금액이 존재하기 때문에 해당 작업을 수행할 수 없습니다."),
     CANNOT_PROJECT_UPDATE(468, "수정할 값이 최소 하나라도 있어야 수정하실 수 있습니다."),
     INCORRECTABLE_DOFUND_INFO(469, "펀딩하려고 하는 정보가 옳바르지 않습니다."),
-    CANT_FUND_MINE(470, "메이커께서 만드신 프로젝트는 스스로 펀딩하실 수 없습니다.");
+    CANT_FUND_MINE(470, "메이커께서 만드신 프로젝트는 스스로 펀딩하실 수 없습니다."),
+    NOT_EXIST_FUND_DATA(471, "펀딩한 데이터가 존재하지 않습니다."),
+    CANT_FUNDING(472, "입력하신 금액이 적어 펀딩할 수 없습니다.");
+
 
 
 

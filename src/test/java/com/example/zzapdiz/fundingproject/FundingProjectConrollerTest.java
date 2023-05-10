@@ -362,6 +362,31 @@ public class FundingProjectConrollerTest {
 
     }
 
+    @DisplayName("[FundingProjectController] 펀딩 프로젝트 종료")
+    @Test
+    void endProject() throws Exception {
+        // given
+        doReturn(new ResponseEntity<>(new ResponseBody(StatusCode.OK, "정상적으로 프로젝트가 종료되었습니다."), HttpStatus.OK))
+                .when(fundingProjectService)
+                .fundingProjectEnd(any(MockHttpServletRequest.class), any(Long.class));
+
+        fundingProjectRepository.save(getFakeProject());
+
+        // when
+        ResultActions resultActionsWhen = mockMvc.perform(
+                MockMvcRequestBuilders.patch("/zzapdiz/funding/end/3")
+                        .characterEncoding("utf-8")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3bHN0cGduczUyQG5hdmVyLmNvbSIsImF1dGgiOiJVU0VSIiwiZXhwIjoxNjgzNzk1OTAyfQ.tQBurIWDawjuxvoTbYjzzG3sPzhDRLlzLPoNskFoQDg")
+        );
+
+        // then
+        ResultActions resultActionsThen = resultActionsWhen
+                .andDo(print())
+                .andExpect(status().isOk());
+
+    }
+
 
     private FundingProjectCreatePhase1RequestDto phase1RequestDto() {
         return FundingProjectCreatePhase1RequestDto.builder()

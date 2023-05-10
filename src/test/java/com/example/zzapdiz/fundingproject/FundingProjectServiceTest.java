@@ -210,14 +210,25 @@ public class FundingProjectServiceTest {
 
         fundingProjectRepository.save(fakeProject);
 
-
         // when
         int statusCode = fundingProjectService.fundingProjectRead(1L).getStatusCodeValue();
-
 
         // then
         assertThat(statusCode).isEqualTo(200);
 
+    }
+
+    @DisplayName("[FundingProjectService] 펀딩 프로젝트 종료 서비스")
+    @Test
+    void endProject() {
+        // given
+        fundingProjectRepository.save(getFakeProject());
+
+        // when
+        int statusCode = fundingProjectService.fundingProjectEnd(any(MockHttpServletRequest.class),3L).getStatusCodeValue();
+
+        // then
+        assertThat(statusCode).isEqualTo(200);
 
     }
 
@@ -342,5 +353,29 @@ public class FundingProjectServiceTest {
                 .rewardQuantity(80000)
                 .rewardAmount(90)
                 .build();
+    }
+
+    private FundingProject getFakeProject(){
+        FundingProject fakeProject = FundingProject.builder()
+                .fundingProjectId(3L)
+                .projectCategory("dd")
+                .projectType("dd")
+                .makerType("dd")
+                .achievedAmount(900)
+                .projectTitle("거짓 타이틀")
+                .endDate(LocalDateTime.now())
+                .adultCheck("X")
+                .searchTag("hh")
+                .storyText("kk")
+                .projectDescript("ll")
+                .openReservation("X")
+                .startDate(LocalDateTime.now())
+                .deliveryCheck("X")
+                .deliveryPrice(90000)
+                .deliveryStartDate(LocalDateTime.now())
+                .progress("진행중")
+                .build();
+
+        return fakeProject;
     }
 }

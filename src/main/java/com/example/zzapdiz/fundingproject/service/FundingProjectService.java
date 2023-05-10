@@ -574,6 +574,27 @@ public class FundingProjectService {
 
         return new ResponseEntity<>(new ResponseBody(StatusCode.OK, "프로젝트 정보가 정상적으로 수정되었습니다."), HttpStatus.OK);
     }
+
+    // 펀딩 프로젝트 수동 종료
+    public ResponseEntity<ResponseBody> fundingProjectEnd(HttpServletRequest request, Long projectId){
+
+        // 펀딩 프로젝트 삭제 요청 회원의 토큰 유효성 검증
+        if (memberExceptionInterface.checkHeaderToken(request)) {
+            return new ResponseEntity<>(new ResponseBody(StatusCode.UNAUTHORIZED_TOKEN, null), HttpStatus.BAD_REQUEST);
+        }
+
+        Member authMember = jwtTokenProvider.getMemberFromAuthentication();
+
+        // 종료하려고 하는 유저가 만든 프로젝트가 맞는지 확인
+        if(!fundingProejctExceptionInterface.checkProjectMaker(authMember, projectId)){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.NOT_CORRECT_MAKER, null), HttpStatus.BAD_REQUEST);
+        }
+
+        // 프로젝트 종료
+        dynamicQueryDsl.updateProjectProgress(projectId);
+
+        return new ResponseEntity<>(new ResponseBody(StatusCode.OK, "프로젝트가 종료되었습니다."), HttpStatus.OK);
+    }
 }
 
 

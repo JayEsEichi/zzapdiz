@@ -66,6 +66,10 @@ dependencies {
     // Aws dependency
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
+    // batch + quartz
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-batch', version: '3.0.5'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz', version: '3.0.5'
+    testImplementation group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.3.8'
 
 }
 

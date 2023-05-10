@@ -151,4 +151,15 @@ public class FundingProjectController {
 
         return fundingProjectService.fundingProjectUpdate(request, fundingProjectUpdateRequestDto, thumbnailImage, videoAndImages);
     }
+
+
+    /**
+     * 펀딩 프로젝트 종료
+     */
+    @PatchMapping("/funding/end/{projectId}")
+    public ResponseEntity<ResponseBody> fundingProjectEnd(HttpServletRequest request, @PathVariable Long projectId){
+        log.info("펀딩 프로젝트 종료 api : 종료 요청 유저 - {}, 종료 프로젝트 id - {}", request, projectId);
+
+        return fundingProjectService.fundingProjectEnd(request, projectId);
+    }
 }

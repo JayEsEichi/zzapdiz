@@ -635,4 +635,21 @@ public class DynamicQueryDsl {
 
     }
 
+    /**
+     * 프로젝트 진행 상황 변경
+     */
+    @Transactional
+    public void updateProjectProgress(Long projectId){
+
+        jpaQueryFactory
+                .update(fundingProject)
+                .set(fundingProject.progress, "종료")
+                .where(fundingProject.fundingProjectId.eq(projectId))
+                .execute();
+
+        entityManager.flush();
+        entityManager.clear();
+
+    }
+
 }

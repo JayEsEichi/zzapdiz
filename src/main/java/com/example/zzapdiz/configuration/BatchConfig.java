@@ -1,6 +1,7 @@
 package com.example.zzapdiz.configuration;
 
 import com.example.zzapdiz.fundingproject.domain.FundingProject;
+import com.example.zzapdiz.page.service.PageService;
 import com.example.zzapdiz.share.query.DynamicQueryDsl;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -31,16 +32,26 @@ public class BatchConfig {
     private final StepBuilderFactory stepBuilderFactory;
     private final JPAQueryFactory jpaQueryFactory;
     private final DynamicQueryDsl dynamicQueryDsl;
+    private final PageService pageService;
 
 
-    // 스케줄러와 배치를 통한 작업
+    // 스케줄러와 배치를 통한 작업 (프로젝트 자동 종료)
     @Bean
-    public Job job() {
+    public Job progressUpdateJob() {
 
         return jobBuilderFactory.get("job")
                 .start(step())
                 .build();
     }
+
+    // 스케줄러와 배치를 통한 작업 (랭킹 프로젝트 업데이트 리스트업)
+//    @Bean
+//    public Job rankingProjectsUpdateJob() {
+//
+//        return jobBuilderFactory.get("job")
+//                .start(step2())
+//                .build();
+//    }
 
 
     // job을 수행하기 위한 step 과정
@@ -74,5 +85,24 @@ public class BatchConfig {
                     return RepeatStatus.FINISHED;
                 }).build();
     }
+
+//    @Bean
+//    public Step step2(){
+//        return stepBuilderFactory.get("step")
+//                .tasklet((contribution, chunkContext) -> {
+//                    log.info("step!");
+//
+//                    /**
+//                     * 펀딩 달성율 구하는 로직을 만들고 해당 달성율이 가장 높은 프로젝트를 스케줄러를 활용하여
+//                     * 매 시간 (1시간 간격) 마다 업데이트하는 step 만들어야 함.
+//                     *
+//                     */
+//
+//                    // 굳이 스케줄러랑 배치로 해야할까?
+//                    // pageService.readMainPage();
+//
+//                    return RepeatStatus.FINISHED;
+//                }).build();
+//    }
 
 }

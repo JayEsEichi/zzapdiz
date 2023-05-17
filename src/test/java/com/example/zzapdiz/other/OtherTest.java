@@ -1,6 +1,7 @@
 package com.example.zzapdiz.other;
 
 import com.example.zzapdiz.fundingproject.domain.FundingProject;
+import com.example.zzapdiz.share.project.ProjectCategory;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.List;
 
 import static com.example.zzapdiz.fundingproject.domain.QFundingProject.fundingProject;
 
@@ -45,5 +47,12 @@ public class OtherTest {
 
         System.out.println("테스트 결과 보여주세요!!!!!!!!!!!!!!!!!!!!!");
 //        System.out.println(LocalDateTime.now().get);
+    }
+
+    @Test
+    void getCategories(){
+
+        System.out.println(ProjectCategory.values());
+
     }
 }

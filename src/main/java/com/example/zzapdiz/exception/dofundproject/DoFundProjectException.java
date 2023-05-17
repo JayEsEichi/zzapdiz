@@ -65,21 +65,24 @@ public class DoFundProjectException implements DoFundProjectExceptionInterface {
     @Override
     public Boolean checkAllPhase(List<DoFundPhase1ResponseDto> doFundPhase1ResponseDtos, Optional<DoFundPhase2ResponseDto> doFundPhase2ResponseDto) {
 
-        if(doFundPhase1ResponseDtos.isEmpty() || doFundPhase2ResponseDto.isEmpty()){
-            return true;
-        }
-
-        return false;
+        return doFundPhase1ResponseDtos.isEmpty() || doFundPhase2ResponseDto.isEmpty();
     }
 
     // 입력한 펀딩 금액이 펀딩하고자 하는 총 리워드들의 금액보다 낮으면 결제 불가 처리
     @Override
     public Boolean checkInputQuantity(int inputQuantity, int compareTotalRewardQuantity) {
 
-        if(inputQuantity < compareTotalRewardQuantity){
-            return true;
-        }
+        return inputQuantity < compareTotalRewardQuantity;
+    }
 
-        return false;
+    // 이미 종료중인 프로젝트라면 펀딩을 할 수 없도록 처리
+    @Override
+    public Boolean checkProgressBeforeFunding(Long projectId) {
+
+        return jpaQueryFactory
+                .select(fundingProject.progress)
+                .from(fundingProject)
+                .where(fundingProject.fundingProjectId.eq(projectId))
+                .fetchOne().equals("종료");
     }
 }

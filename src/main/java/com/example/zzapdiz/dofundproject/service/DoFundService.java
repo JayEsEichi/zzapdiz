@@ -9,13 +9,16 @@ import com.example.zzapdiz.dofundproject.request.DoFundPhase2RequestDto;
 import com.example.zzapdiz.dofundproject.request.InputQuantityDto;
 import com.example.zzapdiz.dofundproject.response.DoFundPhase1ResponseDto;
 import com.example.zzapdiz.dofundproject.response.DoFundPhase2ResponseDto;
+import com.example.zzapdiz.dofundproject.response.FundingRewardResponseDto;
 import com.example.zzapdiz.exception.dofundproject.DoFundProjectException;
 import com.example.zzapdiz.exception.member.MemberExceptionInterface;
 import com.example.zzapdiz.jwt.JwtTokenProvider;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.reward.domain.Reward;
+import com.example.zzapdiz.reward.response.RewardCreateResponseDto;
 import com.example.zzapdiz.share.ResponseBody;
 import com.example.zzapdiz.share.StatusCode;
+import com.example.zzapdiz.share.query.DynamicQueryDsl;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
@@ -44,6 +46,10 @@ public class DoFundService {
     private final JwtTokenProvider jwtTokenProvider;
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
+    private final DynamicQueryDsl dynamicQueryDsl;
+
+    private final HashMap<Long, List<FundingRewardResponseDto>> fundingRewards = new HashMap<>();
+
 
     // 펀딩하기 1단계
     public ResponseEntity<ResponseBody> doFundPhase1(HttpServletRequest request, List<DoFundPhase1RequestDto> doFundPhase1RequestDtos) {
@@ -72,26 +78,33 @@ public class DoFundService {
         }
 
         // 1단계 정보들을 반환해주기 위해 미리 담아놓기 위한 컬렉션 객체 생성
-        List<DoFundPhase1ResponseDto> phase1InfoList = new ArrayList<>();
+        // 펀딩한 리워드들에 대한 정보를 static 변수에 1차적으로 임시 관리 저장
+        List<FundingRewardResponseDto> doFundPhase1ResponseDtos = new ArrayList<>();
+
+        DoFundPhase1ResponseDto phase1FundInfo = DoFundPhase1ResponseDto.builder()
+                .memberId(memberId)
+                .fundingProjectId(doFundPhase1RequestDtos.get(0).getFundingProjectId())
+                .build();
 
         // 펀딩 정보들 저장
         for (DoFundPhase1RequestDto phase1RequestDto : doFundPhase1RequestDtos) {
-            DoFundPhase1ResponseDto phase1 = DoFundPhase1ResponseDto.builder()
+            FundingRewardResponseDto phase1 = FundingRewardResponseDto.builder()
                     .memberId(memberId)
                     .fundingProjectId(phase1RequestDto.getFundingProjectId())
                     .rewardId(phase1RequestDto.getRewardId())
                     .build();
 
-            doFundPhase1Repository.save(phase1);
+            doFundPhase1ResponseDtos.add(phase1);
 
             log.info("펀딩하고 있는 유저 - {}, 캐싱된 펀딩한 리워드 1단계 정보 - {}", phase1.getMemberId(), phase1.getRewardId());
-            phase1InfoList.add(phase1);
-
         }
+
+        fundingRewards.put(memberId, doFundPhase1ResponseDtos);
+        doFundPhase1Repository.save(phase1FundInfo);
 
         HashMap<String, Object> resultSet = new HashMap<>();
         resultSet.put("resultMessage", "펀딩하기 1단계 성공");
-        resultSet.put("resultData", phase1InfoList);
+        resultSet.put("resultData", doFundPhase1ResponseDtos);
 
         return new ResponseEntity<>(new ResponseBody(StatusCode.OK, resultSet), HttpStatus.OK);
     }
@@ -155,6 +168,11 @@ public class DoFundService {
         List<DoFundPhase1ResponseDto> phase1Info = (List<DoFundPhase1ResponseDto>) doFundPhase1Repository.findAllById(Collections.singleton(authMember.getMemberId()));
         Optional<DoFundPhase2ResponseDto> phase2Info = doFundPhase2Repository.findById(authMember.getMemberId());
 
+        // 이미 종료된 프로젝트는 펀딩할 수 없음을 확인
+        if(doFundProjectException.checkProgressBeforeFunding(phase1Info.get(0).getFundingProjectId())){
+            return new ResponseEntity<>(new ResponseBody(StatusCode.CANT_FUND_FOR_END_PROJECT, null), HttpStatus.BAD_REQUEST);
+        }
+
         // 현재 진행 중인 전체 펀딩하기 데이터 확인
         if (doFundProjectException.checkAllPhase(phase1Info, phase2Info)) {
             return new ResponseEntity<>(new ResponseBody(StatusCode.NOT_EXIST_FUND_DATA, null), HttpStatus.BAD_REQUEST);
@@ -163,16 +181,15 @@ public class DoFundService {
         int fundRewardTotalQuantity = 0;
         List<Reward> fundRewardList = new ArrayList<>();
 
-        for (DoFundPhase1ResponseDto phase1Data : phase1Info) {
-
+        for(FundingRewardResponseDto eachPhase1 : fundingRewards.get(authMember.getMemberId())){
             Reward fundReward = jpaQueryFactory
                     .selectFrom(reward)
-                    .where(reward.rewardId.eq(phase1Data.getRewardId()))
+                    .where(reward.rewardId.eq(eachPhase1.getRewardId()))
                     .fetchOne();
 
             fundRewardList.add(fundReward);
 
-            fundRewardTotalQuantity = fundRewardTotalQuantity + fundReward.getRewardQuantity();
+            fundRewardTotalQuantity += fundReward.getRewardQuantity();
         }
 
         // 펀딩하고자 하는 총 리워드 금액보다 입력한 결제 금액이 작으면 결제 불가 처리
@@ -206,6 +223,9 @@ public class DoFundService {
             entityManager.flush();
             entityManager.clear();
         }
+
+        // 펀딩 완료 후 FundingProject 엔티티 CollectQuantity 속성에 펀딩 금액 추가 반영
+        dynamicQueryDsl.updateCollectQuantity(phase2Info.get().getDonation() + (inputQuantityDto.getQuantity() - fundRewardTotalQuantity), phase1Info.get(0).getFundingProjectId());
 
         // 남아있는 임시저장된 Redis 객체들, 펀딩 정보들 삭제
         doFundPhase1Repository.deleteAllById(Collections.singleton(authMember.getMemberId()));

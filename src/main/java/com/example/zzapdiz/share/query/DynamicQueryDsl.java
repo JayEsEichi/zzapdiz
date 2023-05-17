@@ -2,13 +2,20 @@ package com.example.zzapdiz.share.query;
 
 import com.example.zzapdiz.configuration.MySqlCustomTemplate;
 import com.example.zzapdiz.fundingproject.domain.FundingProject;
+import com.example.zzapdiz.fundingproject.repository.FundingProjectRepository;
 import com.example.zzapdiz.fundingproject.request.FundingProjectUpdateRequestDto;
 import com.example.zzapdiz.fundingproject.response.ProjectsReadResponseDto;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.member.request.MemberFindRequestDto;
+import com.example.zzapdiz.page.request.ExhibitionRequestDto;
+import com.example.zzapdiz.page.response.ExhibitionProjectsResponseDto;
+import com.example.zzapdiz.page.response.LankingProjectsResponseDto;
+import com.example.zzapdiz.page.response.RecentOpenProjectsResponseDto;
+import com.example.zzapdiz.page.response.SuitableProjectsResponseDto;
 import com.example.zzapdiz.reward.domain.Reward;
 import com.example.zzapdiz.share.media.Media;
 import com.example.zzapdiz.share.media.MediaUploadInterface;
+import com.example.zzapdiz.share.project.ProjectCategory;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -23,8 +30,8 @@ import javax.persistence.LockModeType;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static com.example.zzapdiz.member.domain.QMember.member;
 import static com.example.zzapdiz.jwt.domain.QToken.token;
@@ -33,11 +40,13 @@ import static com.example.zzapdiz.fundingproject.domain.QFundingProject.fundingP
 import static com.example.zzapdiz.pickproject.domain.QPickProject.pickProject;
 import static com.example.zzapdiz.supportproject.domain.QDoSupport.doSupport;
 import static com.example.zzapdiz.reward.domain.QReward.reward;
+import static com.example.zzapdiz.dofundproject.domain.QDoFund.doFund;
 
 @Slf4j
 @RequiredArgsConstructor
 @Repository
 public class DynamicQueryDsl {
+    private final FundingProjectRepository fundingProjectRepository;
 
     private final JPAQueryFactory jpaQueryFactory;
     private final EntityManager entityManager;
@@ -608,7 +617,7 @@ public class DynamicQueryDsl {
                     .fetch();
 
             // s3에 저장되어 있는 이미지 정보들 삭제
-            for(String eachMediaName : mediaOriginalNameList){
+            for (String eachMediaName : mediaOriginalNameList) {
                 mediaUploadInterface.deleteFile(eachMediaName);
             }
 
@@ -636,10 +645,32 @@ public class DynamicQueryDsl {
     }
 
     /**
+     * 펀딩 후 FundingProject 엔티티 CollectQuantity 속성에 반영
+     */
+    @Transactional
+    public void updateCollectQuantity(Integer collectQuantity, Long projectId) {
+
+        Integer quantity = jpaQueryFactory
+                .select(fundingProject.collectQuantity)
+                .from(fundingProject)
+                .where(fundingProject.fundingProjectId.eq(projectId))
+                .fetchOne();
+
+        jpaQueryFactory
+                .update(fundingProject)
+                .set(fundingProject.collectQuantity, quantity + collectQuantity)
+                .where(fundingProject.fundingProjectId.eq(projectId))
+                .execute();
+
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+    /**
      * 프로젝트 진행 상황 변경
      */
     @Transactional
-    public void updateProjectProgress(Long projectId){
+    public void updateProjectProgress(Long projectId) {
 
         jpaQueryFactory
                 .update(fundingProject)
@@ -650,6 +681,189 @@ public class DynamicQueryDsl {
         entityManager.flush();
         entityManager.clear();
 
+    }
+
+
+    /**
+     * 메인 페이지에 출력될 각각의 다른 카테고리의 펀딩 프로젝트 4개 리스트업
+     */
+    public List<SuitableProjectsResponseDto> getSuitableFundingProjects() {
+
+        List<String> korCategoryList = new ArrayList<>();
+        List<String> projectCategoryList = jpaQueryFactory
+                .select(fundingProject.projectCategory)
+                .from(fundingProject)
+                .groupBy(fundingProject.projectCategory)
+                .orderBy(fundingProject.projectCategory.desc())
+                .fetch();
+
+        while (korCategoryList.size() <= 3) {
+            System.out.println("프로젝트 카테고리 수 : " + projectCategoryList.size());
+
+            int randomNum = (int) (Math.random() * projectCategoryList.size());
+            System.out.println("난수 : " + randomNum);
+
+            String category = projectCategoryList.get(randomNum);
+            System.out.println("카테고리 명 : " + category);
+
+            if (jpaQueryFactory
+                    .selectFrom(fundingProject)
+                    .where(fundingProject.projectCategory.eq(category))
+                    .fetch() != null) {
+
+                korCategoryList.add(category);
+                projectCategoryList.remove(randomNum);
+            }
+        }
+
+        System.out.println("담긴 카테고리 수 " + korCategoryList.size());
+
+        SuitableProjectsResponseDto[] suitableProjects = new SuitableProjectsResponseDto[korCategoryList.size()];
+
+        // 취향에 따른 랜덤 카테고리 프로젝트 4개 조회
+        for (int i = 0; i < korCategoryList.size(); i++) {
+            FundingProject eachProject = jpaQueryFactory
+                    .selectFrom(fundingProject)
+                    .where(fundingProject.projectCategory.eq(korCategoryList.get(i)))
+                    .orderBy(fundingProject.createdAt.desc())
+                    .limit(1)
+                    .fetchOne();
+
+            // 해당 프로젝트가 펀딩된 수
+            Integer fundingCount = jpaQueryFactory
+                    .select(doFund.count().intValue())
+                    .from(doFund)
+                    .where(doFund.fundingProjectId.eq(eachProject.getFundingProjectId()))
+                    .fetchOne();
+
+            // 해당 프로젝트의 썸네일 이미지 주소 출력
+            String thumbnailImage = jpaQueryFactory
+                    .select(media.mediaUrl)
+                    .from(media)
+                    .where(media.fundingProjectId.eq(eachProject.getFundingProjectId()).and(media.mediaPurpose.eq("thumb")))
+                    .fetchOne();
+
+            // 출력할 객체 배열에 build 저장
+            suitableProjects[i] = SuitableProjectsResponseDto.builder()
+                    .fundingProjectId(eachProject.getFundingProjectId())
+                    .fundingCount(fundingCount)
+                    .projectCategory(eachProject.getProjectCategory())
+                    .projectTitle(eachProject.getProjectTitle())
+                    .thumbnailImage(thumbnailImage)
+                    .build();
+        }
+
+        return Arrays.stream(suitableProjects).toList();
+    }
+
+    /**
+     * 메인 페이지에 달성율에 따른 랭킹 프로젝트 5순위까지 출력
+     */
+    public List<LankingProjectsResponseDto> getLankingProjects() {
+        List<FundingProject> lankingProjects = jpaQueryFactory
+                .selectFrom(fundingProject)
+                .orderBy(fundingProject.collectQuantity.divide(fundingProject.achievedAmount).multiply(100).desc())
+                .limit(5)
+                .fetch();
+
+        LankingProjectsResponseDto[] lankingProjectsResponseDtos = new LankingProjectsResponseDto[lankingProjects.size()];
+
+        for (int i = 0; i < lankingProjects.size(); i++) {
+            lankingProjectsResponseDtos[i] = LankingProjectsResponseDto.builder()
+                    .fundingProjectId(lankingProjects.get(i).getFundingProjectId())
+                    .projectCategory(lankingProjects.get(i).getProjectCategory())
+                    .reachPercentage(String.format("%.2f", (float) lankingProjects.get(i).getCollectQuantity() / (float) lankingProjects.get(i).getAchievedAmount() * 100) + "%")
+                    .build();
+
+        }
+
+        return Arrays.stream(lankingProjectsResponseDtos).toList();
+    }
+
+
+    /**
+     * 가장 최근에 오픈한 펀딩 프로젝트 recentProjects 6개 리스트업
+     */
+    public List<RecentOpenProjectsResponseDto> getRecentProjects() {
+
+        List<FundingProject> recentOpenProjects = jpaQueryFactory
+                .selectFrom(fundingProject)
+                .orderBy(fundingProject.createdAt.desc())
+                .limit(6)
+                .fetch();
+
+        RecentOpenProjectsResponseDto[] recentOpenProjectsResponseDtos = new RecentOpenProjectsResponseDto[recentOpenProjects.size()];
+
+        for (int i = 0; i < recentOpenProjects.size(); i++) {
+
+            // 해당 프로젝트의 썸네일 이미지 주소 출력
+            String thumbnailImage = jpaQueryFactory
+                    .select(media.mediaUrl)
+                    .from(media)
+                    .where(media.fundingProjectId.eq(recentOpenProjects.get(i).getFundingProjectId()).and(media.mediaPurpose.eq("thumb")))
+                    .fetchOne();
+
+            recentOpenProjectsResponseDtos[i] = RecentOpenProjectsResponseDto.builder()
+                    .projectTile(recentOpenProjects.get(i).getProjectTitle())
+                    .fundingProjectId(recentOpenProjects.get(i).getFundingProjectId())
+                    .reachPercentage(String.format("%.2f", (float) recentOpenProjects.get(i).getCollectQuantity() / (float) recentOpenProjects.get(i).getAchievedAmount() * 100) + "%")
+                    .thumbnailImage(thumbnailImage)
+                    .build();
+        }
+
+        return Arrays.stream(recentOpenProjectsResponseDtos).toList();
+    }
+
+    /**
+     * 기획전 카테고리 3개마다 프로젝트 3개씩 리스트 업
+     */
+    public HashMap<String, List<ExhibitionProjectsResponseDto>> getExhibitionProjects(ExhibitionRequestDto exhibitionRequestDto) {
+        HashMap<String, List<ExhibitionProjectsResponseDto>> exhibitionProjects = new HashMap<>();
+
+        exhibitionProjects.put(exhibitionRequestDto.getExhibition1(), getExhibitionProjects(exhibitionRequestDto.getExhibition1()));
+        exhibitionProjects.put(exhibitionRequestDto.getExhibition2(), getExhibitionProjects(exhibitionRequestDto.getExhibition2()));
+        exhibitionProjects.put(exhibitionRequestDto.getExhibition3(), getExhibitionProjects(exhibitionRequestDto.getExhibition3()));
+
+        return exhibitionProjects;
+    }
+
+    // 공통으로 저장될 기획전 ResponseDto를 별도의 함수로 만들어 사용
+    private List<ExhibitionProjectsResponseDto> getExhibitionProjects(String exhibition) {
+
+        List<FundingProject> fundingProjects = jpaQueryFactory
+                .selectFrom(fundingProject)
+                .where(fundingProject.projectCategory.eq(exhibition))
+                .orderBy(fundingProject.createdAt.desc())
+                .limit(3)
+                .fetch();
+
+        ExhibitionProjectsResponseDto[] exhibitionProjects = new ExhibitionProjectsResponseDto[fundingProjects.size()];
+
+        for (int i = 0; i < exhibitionProjects.length ; i++) {
+            String thumbnailImage = jpaQueryFactory
+                    .select(media.mediaUrl)
+                    .from(media)
+                    .where(media.fundingProjectId.eq(fundingProjects.get(i).getFundingProjectId()).and(media.mediaPurpose.eq("thumb")))
+                    .fetchOne();
+
+            Integer fundingCount = jpaQueryFactory
+                    .select(doFund.count().intValue())
+                    .from(doFund)
+                    .where(doFund.fundingProjectId.eq(fundingProjects.get(i).getFundingProjectId()))
+                    .fetchOne();
+
+            ExhibitionProjectsResponseDto exhibitionDto = ExhibitionProjectsResponseDto.builder()
+                    .fundingProjectId(fundingProjects.get(i).getFundingProjectId())
+                    .projectCategory(fundingProjects.get(i).getProjectCategory())
+                    .projectTitle(fundingProjects.get(i).getProjectTitle())
+                    .thumbnailImage(thumbnailImage)
+                    .fundingCount(fundingCount)
+                    .build();
+
+            exhibitionProjects[i] = exhibitionDto;
+        }
+
+        return  Arrays.stream(exhibitionProjects).toList();
     }
 
 }

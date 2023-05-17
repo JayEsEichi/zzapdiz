@@ -26,4 +26,7 @@ public interface DoFundProjectExceptionInterface {
 
     /** 입력한 펀딩 금액이 펀딩하고자 하는 총 리워드들의 금액보다 낮으면 결제 불가 처리 **/
     Boolean checkInputQuantity(int inputQuantity, int compareTotalRewardQuantity);
+
+    /** 이미 종료중인 프로젝트는 펀딩을 할 수 없음을 처리 **/
+    Boolean checkProgressBeforeFunding(Long projectId);
 }

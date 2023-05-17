@@ -9,14 +9,10 @@ import java.io.Serializable;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Component
-@RedisHash(value = "doFundPhase1ResponseDto", timeToLive = 1800)
 @Builder
-@Setter
 @Getter
-public class DoFundPhase1ResponseDto implements Serializable {
-
-    @Id
+public class FundingRewardResponseDto{
     private Long memberId;
     private Long fundingProjectId;
+    private Long rewardId;
 }

@@ -35,7 +35,8 @@ public class SecurityConfig {
                         "/zzapdiz/member/login",
                         "/zzapdiz/member/findid",
                         "/zzapdiz/funding/read/**",
-                        "/zzapdiz/funding/readlist/**").permitAll()
+                        "/zzapdiz/funding/readlist/**",
+                        "/zzapdiz/page/**").permitAll()
                 .antMatchers("/test").hasRole("USER")
                 .anyRequest().authenticated()
                 .and()

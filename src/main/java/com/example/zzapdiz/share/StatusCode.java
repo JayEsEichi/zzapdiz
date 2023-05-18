@@ -34,7 +34,8 @@ public enum StatusCode {
     CANT_FUND_MINE(470, "메이커께서 만드신 프로젝트는 스스로 펀딩하실 수 없습니다."),
     NOT_EXIST_FUND_DATA(471, "펀딩한 데이터가 존재하지 않습니다."),
     CANT_FUNDING(472, "입력하신 금액이 적어 펀딩할 수 없습니다."),
-    CANT_FUND_FOR_END_PROJECT(473, "이미 종료된 프로젝트는 펀딩할 수 없습니다.");
+    CANT_FUND_FOR_END_PROJECT(473, "이미 종료된 프로젝트는 펀딩할 수 없습니다."),
+    CANT_CREATE_STORE_PROJECT(474, "스토어 프로젝트를 생성할 수 없습니다.");
 
 
 

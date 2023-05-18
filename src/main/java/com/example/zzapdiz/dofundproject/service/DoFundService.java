@@ -15,7 +15,6 @@ import com.example.zzapdiz.exception.member.MemberExceptionInterface;
 import com.example.zzapdiz.jwt.JwtTokenProvider;
 import com.example.zzapdiz.member.domain.Member;
 import com.example.zzapdiz.reward.domain.Reward;
-import com.example.zzapdiz.reward.response.RewardCreateResponseDto;
 import com.example.zzapdiz.share.ResponseBody;
 import com.example.zzapdiz.share.StatusCode;
 import com.example.zzapdiz.share.query.DynamicQueryDsl;

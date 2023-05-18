@@ -35,7 +35,10 @@ public enum StatusCode {
     NOT_EXIST_FUND_DATA(471, "펀딩한 데이터가 존재하지 않습니다."),
     CANT_FUNDING(472, "입력하신 금액이 적어 펀딩할 수 없습니다."),
     CANT_FUND_FOR_END_PROJECT(473, "이미 종료된 프로젝트는 펀딩할 수 없습니다."),
-    CANT_CREATE_STORE_PROJECT(474, "스토어 프로젝트를 생성할 수 없습니다.");
+    CANT_CREATE_STORE_PROJECT(474, "스토어 프로젝트를 생성할 수 없습니다."),
+    CANT_GIVE_SATISFACTION(475, "만족도 및 별점을 정상적으로 줄 수 없습니다."),
+    CANT_GIVE_SATISFACTION_TO_MINE(476, "자기가 만든 프로젝트에는 만족도 및 별점을 줄 수 없습니다.");
+
 
 
 

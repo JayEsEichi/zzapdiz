@@ -75,7 +75,7 @@ public class MemberException implements MemberExceptionInterface{
         if (jpaQueryFactory
                 .selectFrom(member)
                 .where(member.email.eq(email))
-                .fetch() != null){
+                .fetchOne() != null){
             return true;
         }
 

@@ -697,6 +697,10 @@ public class DynamicQueryDsl {
                 .orderBy(fundingProject.projectCategory.desc())
                 .fetch();
 
+        for(int i = 0 ; i < projectCategoryList.size() ; i++){
+            System.out.println("현재 존재하는 카테고리 수 : " + projectCategoryList.get(i));
+        }
+
         while (korCategoryList.size() <= 3) {
             System.out.println("프로젝트 카테고리 수 : " + projectCategoryList.size());
 
@@ -713,6 +717,10 @@ public class DynamicQueryDsl {
 
                 korCategoryList.add(category);
                 projectCategoryList.remove(randomNum);
+            }
+
+            if(projectCategoryList.size() == 0){
+                break;
             }
         }
 
@@ -839,7 +847,7 @@ public class DynamicQueryDsl {
 
         ExhibitionProjectsResponseDto[] exhibitionProjects = new ExhibitionProjectsResponseDto[fundingProjects.size()];
 
-        for (int i = 0; i < exhibitionProjects.length ; i++) {
+        for (int i = 0; i < exhibitionProjects.length; i++) {
             String thumbnailImage = jpaQueryFactory
                     .select(media.mediaUrl)
                     .from(media)
@@ -863,7 +871,7 @@ public class DynamicQueryDsl {
             exhibitionProjects[i] = exhibitionDto;
         }
 
-        return  Arrays.stream(exhibitionProjects).toList();
+        return Arrays.stream(exhibitionProjects).toList();
     }
 
 }

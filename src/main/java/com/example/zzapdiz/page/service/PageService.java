@@ -1,6 +1,5 @@
 package com.example.zzapdiz.page.service;
 
-import com.example.zzapdiz.fundingproject.domain.FundingProject;
 import com.example.zzapdiz.page.request.ExhibitionRequestDto;
 import com.example.zzapdiz.page.response.ExhibitionProjectsResponseDto;
 import com.example.zzapdiz.page.response.LankingProjectsResponseDto;
@@ -25,9 +24,14 @@ import java.util.List;
 public class PageService {
 
     private final DynamicQueryDsl dynamicQueryDsl;
+//    public static LinkedHashMap<String, Object> resultSet = new LinkedHashMap<>();
 
     // 짭디즈 메인 페이지 접속
     public ResponseEntity<ResponseBody> readMainPage(ExhibitionRequestDto exhibitionRequestDto) {
+
+//        Thread threadHelper = new Thread(new PageThreadHelper(dynamicQueryDsl));
+//        threadHelper.start();
+
         // 1. 취향저격 프로젝트 4개 조회
         List<SuitableProjectsResponseDto> suitableProjects =  dynamicQueryDsl.getSuitableFundingProjects();
 

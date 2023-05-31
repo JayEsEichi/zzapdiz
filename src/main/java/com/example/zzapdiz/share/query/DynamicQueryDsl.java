@@ -724,7 +724,7 @@ public class DynamicQueryDsl {
             }
         }
 
-        System.out.println("담긴 카테고리 수 " + korCategoryList.size());
+        System.out.println("담긴 카테고리 수 : " + korCategoryList.size());
 
         SuitableProjectsResponseDto[] suitableProjects = new SuitableProjectsResponseDto[korCategoryList.size()];
 

@@ -14,7 +14,7 @@ services:
       - springboot-mysql-net
   zzapdiz:
     build:
-      context: ../../../build/libs/
+      context: ./
       dockerfile: Dockerfile
     ports:
       - 8080:8080

@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  db-mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_DATABASE: zzapdiz
+      MYSQL_USER: root
+      MYSQL_PASSWORD: wls124578!
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - 3306:3306
+    networks:
+      - springboot-mysql-net
+  zzapdiz:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      - db-mysql
+    networks:
+      - springboot-mysql-net
+
+networks:
+  springboot-mysql-net:
+    driver: bridge

@@ -1,0 +1,35 @@
+version: "3.7"
+
+services:
+  zzapdiz_mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_DATABASE: zzapdiz
+      MYSQL_USER: root
+      MYSQL_PASSWORD: wls124578!
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - 3306:3306
+    networks:
+      - zzapdiz_network
+  zzapdiz_redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    networks:
+      - zzapdiz_network
+  zzapdiz:
+    build:
+      context: ../../../build/libs/
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      - zzapdiz_mysql
+      - zzapdiz_redis
+    networks:
+      - zzapdiz_network
+
+networks:
+  zzapdiz_network:
+    driver: bridge
